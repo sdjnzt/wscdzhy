@@ -55,7 +55,7 @@
                   </div>
                 </div>
               </template>
-              <el-table :data="bookingList" style="width: 100%">
+              <el-table :data="paginatedBookings" style="width: 100%">
                 <el-table-column prop="title" label="会议主题" />
                 <el-table-column prop="room" label="会议室" />
                 <el-table-column prop="organizer" label="组织者" />
@@ -172,7 +172,7 @@
                   </div>
                 </div>
               </template>
-              <el-table :data="historyRecords" style="width: 100%">
+              <el-table :data="paginatedRecords" style="width: 100%">
                 <el-table-column prop="title" label="会议主题" />
                 <el-table-column prop="room" label="会议室" />
                 <el-table-column prop="organizer" label="组织者" />
@@ -281,7 +281,7 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, computed, watch } from 'vue'
 import {
   VideoPlay,
   VideoPause,
@@ -292,6 +292,7 @@ import {
   Monitor,
   ChatDotRound
 } from '@element-plus/icons-vue'
+import { ElMessage, ElMessageBox } from 'element-plus'
 
 // 搜索关键词
 const searchKeyword = ref('')
@@ -340,7 +341,10 @@ const roomGroups = ref([
         id: 'A001',
         name: 'A区大会议室',
         capacity: 50,
-        facilities: ['投影仪', '视频会议系统', '音响系统']
+        facilities: ['投影仪', '视频会议系统', '音响系统', '电子白板', '无线投屏'],
+        area: '120平方米',
+        location: 'A区3楼',
+        lastMaintenance: '2024-03-15'
       },
       {
         label: 'A区小会议室',
@@ -349,7 +353,22 @@ const roomGroups = ref([
         id: 'A002',
         name: 'A区小会议室',
         capacity: 20,
-        facilities: ['投影仪', '视频会议系统']
+        facilities: ['投影仪', '视频会议系统', '电子白板'],
+        area: '60平方米',
+        location: 'A区3楼',
+        lastMaintenance: '2024-03-15'
+      },
+      {
+        label: 'A区培训室',
+        type: 'room',
+        status: 'available',
+        id: 'A003',
+        name: 'A区培训室',
+        capacity: 100,
+        facilities: ['投影仪', '视频会议系统', '音响系统', '电子白板', '无线投屏', '录播系统'],
+        area: '200平方米',
+        location: 'A区4楼',
+        lastMaintenance: '2024-03-15'
       }
     ]
   },
@@ -363,7 +382,51 @@ const roomGroups = ref([
         id: 'B001',
         name: 'B区会议室',
         capacity: 30,
-        facilities: ['投影仪', '视频会议系统', '音响系统']
+        facilities: ['投影仪', '视频会议系统', '音响系统', '电子白板'],
+        area: '80平方米',
+        location: 'B区2楼',
+        lastMaintenance: '2024-03-15'
+      },
+      {
+        label: 'B区洽谈室',
+        type: 'room',
+        status: 'available',
+        id: 'B002',
+        name: 'B区洽谈室',
+        capacity: 10,
+        facilities: ['视频会议系统', '电子白板'],
+        area: '40平方米',
+        location: 'B区2楼',
+        lastMaintenance: '2024-03-15'
+      }
+    ]
+  },
+  {
+    label: 'C区会议室',
+    children: [
+      {
+        label: 'C区会议室',
+        type: 'room',
+        status: 'available',
+        id: 'C001',
+        name: 'C区会议室',
+        capacity: 40,
+        facilities: ['投影仪', '视频会议系统', '音响系统', '电子白板', '无线投屏'],
+        area: '100平方米',
+        location: 'C区1楼',
+        lastMaintenance: '2024-03-15'
+      },
+      {
+        label: 'C区多功能厅',
+        type: 'room',
+        status: 'available',
+        id: 'C002',
+        name: 'C区多功能厅',
+        capacity: 200,
+        facilities: ['投影仪', '视频会议系统', '音响系统', '电子白板', '无线投屏', '录播系统', '舞台灯光'],
+        area: '300平方米',
+        location: 'C区1楼',
+        lastMaintenance: '2024-03-15'
       }
     ]
   }
@@ -373,7 +436,11 @@ const roomGroups = ref([
 const roomList = ref([
   { id: 'A001', name: 'A区大会议室' },
   { id: 'A002', name: 'A区小会议室' },
-  { id: 'B001', name: 'B区会议室' }
+  { id: 'A003', name: 'A区培训室' },
+  { id: 'B001', name: 'B区会议室' },
+  { id: 'B002', name: 'B区洽谈室' },
+  { id: 'C001', name: 'C区会议室' },
+  { id: 'C002', name: 'C区多功能厅' }
 ])
 
 // 树形配置
@@ -382,42 +449,95 @@ const defaultProps = {
   label: 'label'
 }
 
+// 员工列表
+const employeeList = ref([
+  { id: 'E001', name: '王建国', department: '技术部', position: '技术总监', phone: '13905311234' },
+  { id: 'E002', name: '张丽华', department: '产品部', position: '产品经理', phone: '13805322345' },
+  { id: 'E003', name: '刘志强', department: '市场部', position: '市场总监', phone: '13705333456' },
+  { id: 'E004', name: '周晓明', department: '人事部', position: '人事经理', phone: '13605344567' },
+  { id: 'E005', name: '吴秀英', department: '财务部', position: '财务总监', phone: '13505355678' },
+  { id: 'E006', name: '郑志明', department: '技术部', position: '高级工程师', phone: '13405366789' },
+  { id: 'E007', name: '林美玲', department: '产品部', position: 'UI设计师', phone: '13305377890' },
+  { id: 'E008', name: '黄建国', department: '市场部', position: '市场专员', phone: '13205388901' }
+])
+
 // 预约列表
 const bookingList = ref([
   {
     title: '项目启动会',
     room: 'A区大会议室',
-    organizer: '张三',
+    organizer: '王建国',
     startTime: '2024-03-20 10:00:00',
     endTime: '2024-03-20 11:00:00',
-    status: 'pending'
+    status: 'pending',
+    type: 'normal',
+    attendees: ['张丽华', '刘志强', '周晓明'],
+    remark: '讨论项目整体规划和分工'
   },
   {
     title: '技术评审会',
     room: 'A区小会议室',
-    organizer: '李四',
+    organizer: '郑志明',
     startTime: '2024-03-20 14:00:00',
     endTime: '2024-03-20 15:00:00',
-    status: 'completed'
+    status: 'completed',
+    type: 'video',
+    attendees: ['王建国', '林美玲', '黄建国'],
+    remark: '评审新功能设计方案'
+  },
+  {
+    title: '新员工培训',
+    room: 'A区培训室',
+    organizer: '周晓明',
+    startTime: '2024-03-21 09:00:00',
+    endTime: '2024-03-21 17:00:00',
+    status: 'pending',
+    type: 'training',
+    attendees: ['王建国', '张丽华', '刘志强', '吴秀英'],
+    remark: '新员工入职培训'
+  },
+  {
+    title: '季度总结会',
+    room: 'C区多功能厅',
+    organizer: '吴秀英',
+    startTime: '2024-03-22 14:00:00',
+    endTime: '2024-03-22 17:00:00',
+    status: 'pending',
+    type: 'normal',
+    attendees: ['王建国', '张丽华', '刘志强', '周晓明', '郑志明', '林美玲', '黄建国'],
+    remark: '2024年第一季度工作总结'
   }
 ])
 
 // 参会人员列表
 const attendeeList = ref([
   {
-    name: '张三',
+    name: '王建国',
     department: '技术部',
-    status: 'online'
+    position: '技术总监',
+    status: 'online',
+    joinTime: '2024-03-20 10:00:00'
   },
   {
-    name: '李四',
+    name: '张丽华',
     department: '产品部',
-    status: 'online'
+    position: '产品经理',
+    status: 'online',
+    joinTime: '2024-03-20 10:01:00'
   },
   {
-    name: '王五',
+    name: '刘志强',
     department: '市场部',
-    status: 'offline'
+    position: '市场总监',
+    status: 'offline',
+    joinTime: '2024-03-20 10:05:00'
+  },
+  {
+    name: '周晓明',
+    department: '人事部',
+    position: '人事经理',
+    status: 'online',
+    joinTime: '2024-03-20 10:02:00'
   }
 ])
 
@@ -426,24 +546,66 @@ const historyRecords = ref([
   {
     title: '项目启动会',
     room: 'A区大会议室',
-    organizer: '张三',
+    organizer: '王建国',
     startTime: '2024-03-20 10:00:00',
     endTime: '2024-03-20 11:00:00',
     duration: '1小时',
     attendeeCount: 15,
-    status: 'completed'
+    status: 'completed',
+    type: 'normal',
+    remark: '讨论项目整体规划和分工'
   },
   {
     title: '技术评审会',
     room: 'A区小会议室',
-    organizer: '李四',
+    organizer: '郑志明',
     startTime: '2024-03-20 14:00:00',
     endTime: '2024-03-20 15:00:00',
     duration: '1小时',
     attendeeCount: 8,
-    status: 'completed'
+    status: 'completed',
+    type: 'video',
+    remark: '评审新功能设计方案'
+  },
+  {
+    title: '部门例会',
+    room: 'B区会议室',
+    organizer: '张丽华',
+    startTime: '2024-03-19 10:00:00',
+    endTime: '2024-03-19 11:00:00',
+    duration: '1小时',
+    attendeeCount: 12,
+    status: 'completed',
+    type: 'normal',
+    remark: '产品部周例会'
+  },
+  {
+    title: '客户洽谈',
+    room: 'B区洽谈室',
+    organizer: '刘志强',
+    startTime: '2024-03-19 14:00:00',
+    endTime: '2024-03-19 15:30:00',
+    duration: '1.5小时',
+    attendeeCount: 6,
+    status: 'completed',
+    type: 'video',
+    remark: '与重要客户视频会议'
   }
 ])
+
+// 计算当前页的数据
+const paginatedBookings = computed(() => {
+  const start = (currentPage.value - 1) * pageSize.value
+  const end = start + pageSize.value
+  return bookingList.value.slice(start, end)
+})
+
+// 计算当前页的记录数据
+const paginatedRecords = computed(() => {
+  const start = (currentPage.value - 1) * pageSize.value
+  const end = start + pageSize.value
+  return historyRecords.value.slice(start, end)
+})
 
 // 获取状态类型
 const getStatusType = (status) => {
@@ -506,7 +668,21 @@ const handleEditBooking = (booking) => {
 
 // 删除预约
 const handleDeleteBooking = (booking) => {
-  console.log('删除预约:', booking)
+  ElMessageBox.confirm(
+    `确定要删除会议"${booking.title}"吗？`,
+    '警告',
+    {
+      confirmButtonText: '确定',
+      cancelButtonText: '取消',
+      type: 'warning',
+    }
+  ).then(() => {
+    const index = bookingList.value.findIndex(b => b.title === booking.title)
+    if (index > -1) {
+      bookingList.value.splice(index, 1)
+      ElMessage.success('删除成功')
+    }
+  }).catch(() => {})
 }
 
 // 开始会议
@@ -518,7 +694,51 @@ const handleStartMeeting = (booking) => {
 
 // 保存预约
 const handleSaveBooking = () => {
-  console.log('保存预约:', bookingForm.value)
+  // 表单验证
+  if (!bookingForm.value.title || !bookingForm.value.room || !bookingForm.value.organizer || 
+      !bookingForm.value.timeRange || !bookingForm.value.attendees.length) {
+    ElMessage.error('请填写完整信息')
+    return
+  }
+
+  // 检查时间冲突
+  const startTime = bookingForm.value.timeRange[0]
+  const endTime = bookingForm.value.timeRange[1]
+  const hasConflict = bookingList.value.some(booking => {
+    if (booking.room === bookingForm.value.room && booking.status !== 'cancelled') {
+      return (startTime >= booking.startTime && startTime < booking.endTime) ||
+             (endTime > booking.startTime && endTime <= booking.endTime) ||
+             (startTime <= booking.startTime && endTime >= booking.endTime)
+    }
+    return false
+  })
+
+  if (hasConflict) {
+    ElMessage.error('该时间段会议室已被预约')
+    return
+  }
+
+  if (dialogType.value === 'add') {
+    // 添加新预约
+    bookingList.value.unshift({
+      ...bookingForm.value,
+      startTime: bookingForm.value.timeRange[0],
+      endTime: bookingForm.value.timeRange[1],
+      status: 'pending'
+    })
+    ElMessage.success('添加成功')
+  } else {
+    // 更新预约
+    const index = bookingList.value.findIndex(b => b.title === bookingForm.value.title)
+    if (index > -1) {
+      bookingList.value[index] = {
+        ...bookingForm.value,
+        startTime: bookingForm.value.timeRange[0],
+        endTime: bookingForm.value.timeRange[1]
+      }
+      ElMessage.success('更新成功')
+    }
+  }
   showBookingDialog.value = false
 }
 
@@ -560,7 +780,34 @@ const handleImport = () => {
 
 // 导出数据
 const handleExport = () => {
-  console.log('导出数据')
+  // 准备导出数据
+  const exportData = activeTab.value === 'booking' ? bookingList.value.map(booking => ({
+    '会议主题': booking.title,
+    '会议室': booking.room,
+    '组织者': booking.organizer,
+    '开始时间': booking.startTime,
+    '结束时间': booking.endTime,
+    '会议类型': booking.type === 'normal' ? '普通会议' : booking.type === 'video' ? '视频会议' : '培训会议',
+    '状态': getStatusText(booking.status),
+    '参会人数': booking.attendees.length,
+    '备注': booking.remark
+  })) : historyRecords.value.map(record => ({
+    '会议主题': record.title,
+    '会议室': record.room,
+    '组织者': record.organizer,
+    '开始时间': record.startTime,
+    '结束时间': record.endTime,
+    '时长': record.duration,
+    '参会人数': record.attendeeCount,
+    '会议类型': record.type === 'normal' ? '普通会议' : record.type === 'video' ? '视频会议' : '培训会议',
+    '状态': record.status === 'completed' ? '已完成' : '异常结束',
+    '备注': record.remark
+  }))
+
+  // 模拟导出过程
+  setTimeout(() => {
+    ElMessage.success('导出成功')
+  }, 1000)
 }
 
 // 处理日期变化
@@ -570,13 +817,26 @@ const handleDateChange = (val) => {
 
 // 处理分页大小变化
 const handleSizeChange = (val) => {
-  console.log('每页条数:', val)
+  pageSize.value = val
+  currentPage.value = 1
+  total.value = activeTab.value === 'booking' ? bookingList.value.length : 
+                activeTab.value === 'records' ? historyRecords.value.length : 0
 }
 
 // 处理页码变化
 const handleCurrentChange = (val) => {
-  console.log('当前页:', val)
+  currentPage.value = val
 }
+
+// 监听标签页变化
+watch(activeTab, (newTab) => {
+  currentPage.value = 1
+  total.value = newTab === 'booking' ? bookingList.value.length : 
+                newTab === 'records' ? historyRecords.value.length : 0
+})
+
+// 初始化总数
+total.value = bookingList.value.length
 </script>
 
 <style scoped>

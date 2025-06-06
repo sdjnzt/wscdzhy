@@ -9,7 +9,10 @@
               <el-button type="primary" @click="showFaceLibrary = true">
                 <el-icon><User /></el-icon>人脸库管理
               </el-button>
-              <el-button type="success" @click="showSettings = true">
+              <el-button type="success" @click="showAccessControl = true">
+                <el-icon><Lock /></el-icon>门禁管理
+              </el-button>
+              <el-button type="warning" @click="showSettings = true">
                 <el-icon><Setting /></el-icon>系统配置
               </el-button>
             </el-button-group>
@@ -152,7 +155,7 @@
           </el-table-column>
           <el-table-column label="进入权限" width="100">
             <template #default="scope">
-              <el-tag v-if="scope.row.type === 'success'" :type="scope.row.access ? 'success' : 'danger'">
+              <el-tag v-if="scope.row.type === 'success' && scope.row.access" :type="scope.row.access ? 'success' : 'danger'">
                 {{ scope.row.access ? '允许' : '禁止' }}
               </el-tag>
               <span v-else>-</span>
@@ -262,6 +265,708 @@
           />
         </div>
       </div>
+    </el-dialog>
+
+    <!-- 门禁管理对话框 -->
+    <el-dialog
+      v-model="showAccessControl"
+      title="门禁管理"
+      width="90%"
+      destroy-on-close
+      top="5vh"
+    >
+      <el-tabs v-model="accessControlActiveTab">
+        <el-tab-pane label="门禁点管理" name="gates">
+          <!-- 门禁统计卡片 -->
+          <el-row :gutter="20" class="dashboard-cards">
+            <el-col :span="6">
+              <el-card shadow="hover" class="stat-card">
+                <template #header>
+                  <div class="stat-title">
+                    <el-icon><Lock /></el-icon>
+                    <span>门禁总数</span>
+                  </div>
+                </template>
+                <div class="stat-content">
+                  <div class="stat-value">{{ gatesList.length }}</div>
+                  <div class="stat-desc">
+                    <el-tag size="small" type="success">{{ getActiveGatesCount() }}个启用</el-tag>
+                    <el-tag size="small" type="danger" style="margin-left: 5px">{{ getInactiveGatesCount() }}个禁用</el-tag>
+                  </div>
+                </div>
+              </el-card>
+            </el-col>
+            <el-col :span="6">
+              <el-card shadow="hover" class="stat-card">
+                <template #header>
+                  <div class="stat-title">
+                    <el-icon><User /></el-icon>
+                    <span>今日通行</span>
+                  </div>
+                </template>
+                <div class="stat-content">
+                  <div class="stat-value">387</div>
+                  <div class="stat-desc">
+                    <div class="progress-container">
+                      <div class="progress-label">同比增长 12.5%</div>
+                      <el-progress :percentage="73" :color="'#409EFF'" :show-text="false"></el-progress>
+                    </div>
+                  </div>
+                </div>
+              </el-card>
+            </el-col>
+            <el-col :span="6">
+              <el-card shadow="hover" class="stat-card">
+                <template #header>
+                  <div class="stat-title">
+                    <el-icon><Warning /></el-icon>
+                    <span>拒绝记录</span>
+                  </div>
+                </template>
+                <div class="stat-content">
+                  <div class="stat-value">42</div>
+                  <div class="stat-desc">
+                    <div class="progress-container">
+                      <div class="progress-label">占比 10.8%</div>
+                      <el-progress :percentage="10.8" :color="'#E6A23C'" :show-text="false"></el-progress>
+                    </div>
+                  </div>
+                </div>
+              </el-card>
+            </el-col>
+            <el-col :span="6">
+              <el-card shadow="hover" class="stat-card">
+                <template #header>
+                  <div class="stat-title">
+                    <el-icon><InfoFilled /></el-icon>
+                    <span>权限规则</span>
+                  </div>
+                </template>
+                <div class="stat-content">
+                  <div class="stat-value">{{ accessRules.length }}</div>
+                  <div class="stat-desc">
+                    <el-button type="primary" link @click="accessControlActiveTab = 'rules'">管理规则</el-button>
+                  </div>
+                </div>
+              </el-card>
+            </el-col>
+          </el-row>
+
+          <div class="operation-bar">
+            <div class="left-actions">
+              <el-button type="primary" @click="handleAddGate">
+                <el-icon><Plus /></el-icon>添加门禁点
+              </el-button>
+              <el-button type="danger" :disabled="!selectedGates.length" @click="handleBatchDeleteGates">
+                <el-icon><Delete /></el-icon>批量删除
+              </el-button>
+            </div>
+            <div class="right-search">
+              <el-input
+                v-model="gateSearchKeyword"
+                placeholder="搜索门禁名称/位置"
+                prefix-icon="Search"
+                clearable
+                style="width: 250px"
+              />
+              <el-select v-model="gateStatusFilter" placeholder="状态筛选" style="width: 120px; margin-left: 10px">
+                <el-option label="全部" value="" />
+                <el-option label="启用" value="active" />
+                <el-option label="禁用" value="inactive" />
+              </el-select>
+              <el-select v-model="gateAreaFilter" placeholder="区域筛选" style="width: 120px; margin-left: 10px">
+                <el-option label="全部区域" value="" />
+                <el-option label="A区" value="A区" />
+                <el-option label="B区" value="B区" />
+                <el-option label="C区" value="C区" />
+                <el-option label="D区" value="D区" />
+                <el-option label="E区" value="E区" />
+              </el-select>
+            </div>
+          </div>
+          
+          <el-table
+            :data="filteredGatesList"
+            style="width: 100%; margin-top: 15px"
+            border
+            stripe
+            @selection-change="handleGateSelectionChange"
+            v-loading="gatesLoading"
+          >
+            <el-table-column type="selection" width="55" />
+            <el-table-column prop="id" label="门禁ID" width="100" />
+            <el-table-column prop="name" label="门禁名称" width="150" />
+            <el-table-column prop="location" label="位置" width="150" />
+            <el-table-column prop="type" label="类型" width="120">
+              <template #default="scope">
+                <el-tag :type="getGateTypeTag(scope.row.type)">
+                  {{ scope.row.type }}
+                </el-tag>
+              </template>
+            </el-table-column>
+            <el-table-column prop="deviceId" label="关联设备" width="120" />
+            <el-table-column label="状态" width="100">
+              <template #default="scope">
+                <el-tag :type="scope.row.status === 'active' ? 'success' : 'danger'">
+                  {{ scope.row.status === 'active' ? '启用' : '禁用' }}
+                </el-tag>
+              </template>
+            </el-table-column>
+            <el-table-column prop="lastMaintenance" label="最近维护" width="150" />
+            <el-table-column label="今日通行" width="100">
+              <template #default="scope">
+                {{ scope.row.todayAccessCount || 0 }}
+              </template>
+            </el-table-column>
+            <el-table-column label="操作" width="310">
+              <template #default="scope">
+                <el-button-group>
+                  <el-button type="primary" size="small" @click="handleEditGate(scope.row)">
+                    <el-icon><Edit /></el-icon>编辑
+                  </el-button>
+                  <el-button 
+                    :type="scope.row.status === 'active' ? 'danger' : 'success'" 
+                    size="small" 
+                    @click="handleToggleGateStatus(scope.row)">
+                    {{ scope.row.status === 'active' ? '禁用' : '启用' }}
+                  </el-button>
+                  <el-button type="warning" size="small" @click="handleGatePermission(scope.row)">
+                    <el-icon><Setting /></el-icon>权限配置
+                  </el-button>
+                  <el-button type="info" size="small" @click="handleGateLog(scope.row)">
+                    <el-icon><InfoFilled /></el-icon>访问记录
+                  </el-button>
+                </el-button-group>
+              </template>
+            </el-table-column>
+          </el-table>
+
+          <div class="pagination-container" style="margin-top: 20px">
+            <el-pagination
+              v-model:current-page="gatesPage"
+              v-model:page-size="gatesPageSize"
+              :page-sizes="[10, 20, 50, 100]"
+              layout="total, sizes, prev, pager, next, jumper"
+              :total="filteredGatesList.length"
+            />
+          </div>
+
+          <el-divider content-position="center">门禁分布</el-divider>
+
+          <!-- 门禁分布图表 -->
+          <div class="gates-chart-container">
+            <div id="gates-distribution-chart" style="height: 300px; width: 100%"></div>
+          </div>
+        </el-tab-pane>
+        
+        <el-tab-pane label="权限规则" name="rules">
+          <!-- 权限规则统计卡片 -->
+          <el-row :gutter="20" class="dashboard-cards">
+            <el-col :span="6">
+              <el-card shadow="hover" class="stat-card">
+                <template #header>
+                  <div class="stat-title">
+                    <el-icon><Document /></el-icon>
+                    <span>规则总数</span>
+                  </div>
+                </template>
+                <div class="stat-content">
+                  <div class="stat-value">{{ accessRules.length }}</div>
+                  <div class="stat-desc">
+                    <el-tag size="small" type="success">{{ getActiveRulesCount() }}个启用</el-tag>
+                    <el-tag size="small" type="danger" style="margin-left: 5px">{{ getInactiveRulesCount() }}个禁用</el-tag>
+                  </div>
+                </div>
+              </el-card>
+            </el-col>
+            <el-col :span="6">
+              <el-card shadow="hover" class="stat-card">
+                <template #header>
+                  <div class="stat-title">
+                    <el-icon><OfficeBuilding /></el-icon>
+                    <span>部门规则</span>
+                  </div>
+                </template>
+                <div class="stat-content">
+                  <div class="stat-value">{{ getDepartmentRulesCount() }}</div>
+                  <div class="stat-desc">
+                    <div class="progress-container">
+                      <div class="progress-label">占比 {{ Math.round(getDepartmentRulesCount() / accessRules.length * 100) }}%</div>
+                      <el-progress :percentage="getDepartmentRulesCount() / accessRules.length * 100" :color="'#409EFF'" :show-text="false"></el-progress>
+                    </div>
+                  </div>
+                </div>
+              </el-card>
+            </el-col>
+            <el-col :span="6">
+              <el-card shadow="hover" class="stat-card">
+                <template #header>
+                  <div class="stat-title">
+                    <el-icon><User /></el-icon>
+                    <span>个人规则</span>
+                  </div>
+                </template>
+                <div class="stat-content">
+                  <div class="stat-value">{{ getPersonRulesCount() }}</div>
+                  <div class="stat-desc">
+                    <div class="progress-container">
+                      <div class="progress-label">占比 {{ Math.round(getPersonRulesCount() / accessRules.length * 100) }}%</div>
+                      <el-progress :percentage="getPersonRulesCount() / accessRules.length * 100" :color="'#67C23A'" :show-text="false"></el-progress>
+                    </div>
+                  </div>
+                </div>
+              </el-card>
+            </el-col>
+            <el-col :span="6">
+              <el-card shadow="hover" class="stat-card">
+                <template #header>
+                  <div class="stat-title">
+                    <el-icon><Timer /></el-icon>
+                    <span>时间规则</span>
+                  </div>
+                </template>
+                <div class="stat-content">
+                  <div class="stat-value">{{ getTimeRulesCount() }}</div>
+                  <div class="stat-desc">
+                    <div class="progress-container">
+                      <div class="progress-label">占比 {{ Math.round(getTimeRulesCount() / accessRules.length * 100) }}%</div>
+                      <el-progress :percentage="getTimeRulesCount() / accessRules.length * 100" :color="'#E6A23C'" :show-text="false"></el-progress>
+                    </div>
+                  </div>
+                </div>
+              </el-card>
+            </el-col>
+          </el-row>
+
+          <div class="operation-bar">
+            <div class="left-actions">
+              <el-button type="primary" @click="handleAddRule">
+                <el-icon><Plus /></el-icon>添加规则
+              </el-button>
+              <el-button type="danger" :disabled="!selectedRules.length" @click="handleBatchDeleteRules">
+                <el-icon><Delete /></el-icon>批量删除
+              </el-button>
+            </div>
+            <div class="right-search">
+              <el-input
+                v-model="ruleSearchKeyword"
+                placeholder="搜索规则名称/对象"
+                prefix-icon="Search"
+                clearable
+                style="width: 250px"
+              />
+              <el-select v-model="ruleTypeFilter" placeholder="规则类型" style="width: 120px; margin-left: 10px">
+                <el-option label="全部规则" value="" />
+                <el-option label="部门规则" value="department" />
+                <el-option label="个人规则" value="person" />
+                <el-option label="时间规则" value="time" />
+              </el-select>
+              <el-select v-model="ruleStatusFilter" placeholder="状态" style="width: 120px; margin-left: 10px">
+                <el-option label="全部" value="" />
+                <el-option label="启用" value="active" />
+                <el-option label="禁用" value="inactive" />
+              </el-select>
+            </div>
+          </div>
+          
+          <el-table
+            :data="filteredRules"
+            style="width: 100%; margin-top: 15px"
+            border
+            stripe
+            @selection-change="handleRuleSelectionChange"
+            v-loading="rulesLoading"
+          >
+            <el-table-column type="selection" width="55" />
+            <el-table-column prop="id" label="规则ID" width="70" />
+            <el-table-column prop="name" label="规则名称" width="180" />
+            <el-table-column prop="type" label="规则类型" width="100">
+              <template #default="scope">
+                <el-tag :type="getTagType(scope.row.type)">
+                  {{ getRuleTypeText(scope.row.type) }}
+                </el-tag>
+              </template>
+            </el-table-column>
+            <el-table-column prop="target" label="适用对象" width="150" />
+            <el-table-column prop="gates" label="适用门禁" width="180" />
+            <el-table-column prop="timeRange" label="时间范围" width="150" />
+            <el-table-column prop="priority" label="优先级" width="80">
+              <template #default="scope">
+                <el-tag type="info" size="small">{{ scope.row.priority }}</el-tag>
+              </template>
+            </el-table-column>
+            <el-table-column label="状态" width="80">
+              <template #default="scope">
+                <el-tag :type="scope.row.status === 'active' ? 'success' : 'danger'">
+                  {{ scope.row.status === 'active' ? '启用' : '禁用' }}
+                </el-tag>
+              </template>
+            </el-table-column>
+            <el-table-column prop="createdAt" label="创建时间" width="150" />
+            <el-table-column label="操作" width="210">
+              <template #default="scope">
+                <el-button-group>
+                  <el-button type="primary" size="small" @click="handleEditRule(scope.row)">
+                    <el-icon><Edit /></el-icon>编辑
+                  </el-button>
+                  <el-button 
+                    :type="scope.row.status === 'active' ? 'danger' : 'success'" 
+                    size="small" 
+                    @click="handleToggleRuleStatus(scope.row)">
+                    {{ scope.row.status === 'active' ? '禁用' : '启用' }}
+                  </el-button>
+                  <el-button type="danger" size="small" @click="handleDeleteRule(scope.row)">
+                    <el-icon><Delete /></el-icon>删除
+                  </el-button>
+                </el-button-group>
+              </template>
+            </el-table-column>
+          </el-table>
+          
+          <div class="pagination-container" style="margin-top: 20px">
+            <el-pagination
+              v-model:current-page="rulesPage"
+              v-model:page-size="rulesPageSize"
+              :page-sizes="[10, 20, 50, 100]"
+              layout="total, sizes, prev, pager, next, jumper"
+              :total="filteredRules.length"
+            />
+          </div>
+        </el-tab-pane>
+        
+        <el-tab-pane label="访问记录" name="logs">
+          <!-- 访问记录统计卡片 -->
+          <el-row :gutter="20" class="dashboard-cards">
+            <el-col :span="6">
+              <el-card shadow="hover" class="stat-card">
+                <template #header>
+                  <div class="stat-title">
+                    <el-icon><Monitor /></el-icon>
+                    <span>今日总通行</span>
+                  </div>
+                </template>
+                <div class="stat-content">
+                  <div class="stat-value">387</div>
+                  <div class="stat-desc">
+                    <el-tag size="small" type="success">允许 345</el-tag>
+                    <el-tag size="small" type="danger" style="margin-left: 5px">拒绝 42</el-tag>
+                  </div>
+                </div>
+              </el-card>
+            </el-col>
+            <el-col :span="6">
+              <el-card shadow="hover" class="stat-card">
+                <template #header>
+                  <div class="stat-title">
+                    <el-icon><TopRight /></el-icon>
+                    <span>高峰时段</span>
+                  </div>
+                </template>
+                <div class="stat-content">
+                  <div class="stat-value">08:00-09:30</div>
+                  <div class="stat-desc">
+                    <div class="progress-container">
+                      <div class="progress-label">占比 36.2%</div>
+                      <el-progress :percentage="36.2" :color="'#409EFF'" :show-text="false"></el-progress>
+                    </div>
+                  </div>
+                </div>
+              </el-card>
+            </el-col>
+            <el-col :span="6">
+              <el-card shadow="hover" class="stat-card">
+                <template #header>
+                  <div class="stat-title">
+                    <el-icon><ArrowRight /></el-icon>
+                    <span>通行率</span>
+                  </div>
+                </template>
+                <div class="stat-content">
+                  <div class="stat-value">89.2%</div>
+                  <div class="stat-desc">
+                    <div class="progress-container">
+                      <div class="progress-label">较昨日 +1.3%</div>
+                      <el-progress :percentage="89.2" :color="'#67C23A'" :show-text="false"></el-progress>
+                    </div>
+                  </div>
+                </div>
+              </el-card>
+            </el-col>
+            <el-col :span="6">
+              <el-card shadow="hover" class="stat-card">
+                <template #header>
+                  <div class="stat-title">
+                    <el-icon><Aim /></el-icon>
+                    <span>异常识别</span>
+                  </div>
+                </template>
+                <div class="stat-content">
+                  <div class="stat-value">18</div>
+                  <div class="stat-desc">
+                    <el-button type="danger" link @click="handleAbnormalAccess">查看异常</el-button>
+                  </div>
+                </div>
+              </el-card>
+            </el-col>
+          </el-row>
+
+          <div class="filter-bar">
+            <el-form :inline="true" :model="accessLogFilter" class="filter-form">
+              <el-form-item label="时间范围">
+                <el-date-picker
+                  v-model="accessLogFilter.dateRange"
+                  type="daterange"
+                  range-separator="至"
+                  start-placeholder="开始日期"
+                  end-placeholder="结束日期"
+                  value-format="YYYY-MM-DD"
+                  shortcuts
+                />
+              </el-form-item>
+              <el-form-item label="门禁点">
+                <el-select v-model="accessLogFilter.gate" placeholder="全部" filterable>
+                  <el-option label="全部" value="" />
+                  <el-option 
+                    v-for="gate in gatesList" 
+                    :key="gate.id" 
+                    :label="gate.name" 
+                    :value="gate.id" 
+                  />
+                </el-select>
+              </el-form-item>
+              <el-form-item label="结果">
+                <el-select v-model="accessLogFilter.result" placeholder="全部">
+                  <el-option label="全部" value="" />
+                  <el-option label="允许" value="allow" />
+                  <el-option label="拒绝" value="deny" />
+                </el-select>
+              </el-form-item>
+              <el-form-item label="人员">
+                <el-input 
+                  v-model="accessLogFilter.person" 
+                  placeholder="搜索姓名"
+                  clearable
+                  style="width: 120px"
+                />
+              </el-form-item>
+              <el-form-item>
+                <el-button type="primary" @click="handleFilterAccessLogs">查询</el-button>
+                <el-button @click="resetAccessLogFilter">重置</el-button>
+                <el-button type="success" @click="exportAccessLogs">
+                  <el-icon><Download /></el-icon>导出
+                </el-button>
+              </el-form-item>
+            </el-form>
+          </div>
+          
+          <el-table
+            :data="filteredAccessLogs"
+            style="width: 100%"
+            border
+            stripe
+            v-loading="logsLoading"
+            max-height="450px"
+          >
+            <el-table-column type="index" width="60" />
+            <el-table-column prop="time" label="访问时间" width="160" sortable />
+            <el-table-column prop="name" label="姓名" width="100" />
+            <el-table-column prop="department" label="部门" width="100" />
+            <el-table-column prop="gateName" label="门禁点" width="130" />
+            <el-table-column prop="direction" label="方向" width="80">
+              <template #default="scope">
+                <el-tag :type="scope.row.direction === '进入' ? 'success' : 'info'">
+                  {{ scope.row.direction }}
+                </el-tag>
+              </template>
+            </el-table-column>
+            <el-table-column label="结果" width="80">
+              <template #default="scope">
+                <el-tag :type="scope.row.result === 'allow' ? 'success' : 'danger'">
+                  {{ scope.row.result === 'allow' ? '允许' : '拒绝' }}
+                </el-tag>
+              </template>
+            </el-table-column>
+            <el-table-column prop="reason" label="原因" min-width="180" />
+            <el-table-column prop="verifyType" label="验证方式" width="100">
+              <template #default="scope">
+                <el-tag type="info">{{ scope.row.verifyType }}</el-tag>
+              </template>
+            </el-table-column>
+            <el-table-column label="操作" width="100" fixed="right">
+              <template #default="scope">
+                <el-button type="primary" size="small" @click="handleLogDetail(scope.row)">
+                  详情
+                </el-button>
+              </template>
+            </el-table-column>
+          </el-table>
+          
+          <div class="pagination-container" style="margin-top: 20px">
+            <el-pagination
+              v-model:current-page="accessLogPage"
+              v-model:page-size="accessLogPageSize"
+              :page-sizes="[10, 20, 50, 100]"
+              layout="total, sizes, prev, pager, next, jumper"
+              :total="filteredAccessLogs.length"
+            />
+          </div>
+
+          <!-- 图表区域 -->
+          <el-divider content-position="center">今日通行趋势</el-divider>
+
+          <div class="logs-chart-container">
+            <div id="access-trend-chart" style="height: 300px; width: 100%"></div>
+          </div>
+        </el-tab-pane>
+        
+        <el-tab-pane label="紧急控制" name="emergency">
+          <el-row :gutter="20" class="dashboard-cards">
+            <el-col :span="24">
+              <el-card class="emergency-status-card">
+                <template #header>
+                  <div class="emergency-status-header">
+                    <h4>当前系统状态</h4>
+                    <el-tag :type="emergencyStatus === 'normal' ? 'success' : 'danger'" size="large">
+                      {{ getEmergencyStatusText() }}
+                    </el-tag>
+                  </div>
+                </template>
+                <div class="emergency-status-content">
+                  <div class="status-detail">
+                    <div class="detail-item">
+                      <span class="label">模式:</span>
+                      <span class="value">{{ emergencyStatus === 'normal' ? '正常运行' : emergencyStatus === 'unlock' ? '全部解锁' : '全部锁定' }}</span>
+                    </div>
+                    <div class="detail-item">
+                      <span class="label">启动时间:</span>
+                      <span class="value">{{ emergencyStartTime || '-' }}</span>
+                    </div>
+                    <div class="detail-item">
+                      <span class="label">启动人员:</span>
+                      <span class="value">{{ emergencyOperator || '-' }}</span>
+                    </div>
+                    <div class="detail-item">
+                      <span class="label">原因:</span>
+                      <span class="value">{{ emergencyReason || '-' }}</span>
+                    </div>
+                  </div>
+                  <el-progress
+                    :percentage="emergencyStatus === 'normal' ? 100 : 0"
+                    :status="emergencyStatus === 'normal' ? 'success' : 'exception'"
+                    :stroke-width="20"
+                    :show-text="false"
+                  ></el-progress>
+                </div>
+              </el-card>
+            </el-col>
+          </el-row>
+
+          <el-card class="emergency-card warning-card">
+            <template #header>
+              <div class="emergency-header">
+                <h4><el-icon><WarningFilled /></el-icon> 紧急控制面板</h4>
+              </div>
+            </template>
+            <div class="emergency-content">
+              <div class="emergency-warning">
+                <p>警告：紧急控制功能将覆盖所有门禁常规设置，请谨慎操作！</p>
+              </div>
+              <div class="emergency-actions">
+                <el-row :gutter="20">
+                  <el-col :span="8">
+                    <el-card class="emergency-action-card" :class="{ 'active-card': emergencyStatus === 'unlock' }">
+                      <h5>全部开启</h5>
+                      <p>紧急情况下解锁所有门禁</p>
+                      <el-button 
+                        type="success" 
+                        @click="handleEmergencyUnlock" 
+                        :disabled="emergencyStatus === 'unlock'"
+                      >
+                        <el-icon><Unlock /></el-icon> 全部解锁
+                      </el-button>
+                    </el-card>
+                  </el-col>
+                  <el-col :span="8">
+                    <el-card class="emergency-action-card" :class="{ 'active-card': emergencyStatus === 'lock' }">
+                      <h5>全部锁定</h5>
+                      <p>紧急情况下锁定所有门禁</p>
+                      <el-button 
+                        type="danger" 
+                        @click="handleEmergencyLock" 
+                        :disabled="emergencyStatus === 'lock'"
+                      >
+                        <el-icon><Lock /></el-icon> 全部锁定
+                      </el-button>
+                    </el-card>
+                  </el-col>
+                  <el-col :span="8">
+                    <el-card class="emergency-action-card" :class="{ 'active-card': emergencyStatus === 'normal' }">
+                      <h5>恢复正常</h5>
+                      <p>恢复门禁系统到正常状态</p>
+                      <el-button 
+                        type="primary" 
+                        @click="handleEmergencyReset" 
+                        :disabled="emergencyStatus === 'normal'"
+                      >
+                        <el-icon><RefreshRight /></el-icon> 恢复正常
+                      </el-button>
+                    </el-card>
+                  </el-col>
+                </el-row>
+              </div>
+            </div>
+          </el-card>
+          
+          <el-card style="margin-top: 20px">
+            <template #header>
+              <div class="logs-header">
+                <h4>紧急操作记录</h4>
+                <div class="logs-actions">
+                  <el-button size="small" type="primary" @click="refreshEmergencyLogs">
+                    <el-icon><RefreshLeft /></el-icon> 刷新
+                  </el-button>
+                  <el-button size="small" type="success" @click="exportEmergencyLogs">
+                    <el-icon><Download /></el-icon> 导出
+                  </el-button>
+                </div>
+              </div>
+            </template>
+            <el-table
+              :data="emergencyLogs"
+              style="width: 100%"
+              border
+              stripe
+              v-loading="emergencyLogsLoading"
+            >
+              <el-table-column prop="time" label="操作时间" width="180" sortable />
+              <el-table-column prop="operator" label="操作人" width="120" />
+              <el-table-column prop="action" label="操作类型" width="150">
+                <template #default="scope">
+                  <el-tag :type="getEmergencyTagType(scope.row.action)">
+                    {{ scope.row.action }}
+                  </el-tag>
+                </template>
+              </el-table-column>
+              <el-table-column prop="reason" label="操作原因" min-width="200" />
+              <el-table-column prop="affectedGates" label="影响门禁" width="120">
+                <template #default="scope">
+                  {{ scope.row.affectedGates || '全部' }}
+                </template>
+              </el-table-column>
+              <el-table-column prop="duration" label="持续时间" width="120" />
+            </el-table>
+            <div class="pagination-container" style="margin-top: 20px">
+              <el-pagination
+                v-model:current-page="emergencyLogsPage"
+                v-model:page-size="emergencyLogsPageSize"
+                :page-sizes="[10, 20, 50, 100]"
+                layout="total, sizes, prev, pager, next, jumper"
+                :total="emergencyLogs.length"
+              />
+            </div>
+          </el-card>
+        </el-tab-pane>
+      </el-tabs>
     </el-dialog>
 
     <!-- 识别设置对话框 -->
@@ -396,7 +1101,20 @@ import {
   Edit,
   Delete,
   InfoFilled,
-  Warning
+  Warning,
+  Lock,
+  Unlock,
+  Plus,
+  WarningFilled,
+  RefreshRight,
+  Document,
+  OfficeBuilding,
+  Timer,
+  TopRight,
+  ArrowRight,
+  Aim,
+  Download,
+  RefreshLeft
 } from '@element-plus/icons-vue'
 
 // 搜索和过滤
@@ -419,10 +1137,12 @@ const faceLibraryPageSize = ref(10)
 // 对话框控制
 const showFaceLibrary = ref(false)
 const showSettings = ref(false)
+const showAccessControl = ref(false)
 const recordDetailVisible = ref(false)
 const selectedRecord = ref(null)
 const tableLoading = ref(false)
 const settingsActiveTab = ref('basic')
+const accessControlActiveTab = ref('gates')
 
 // 选中的人脸数据
 const selectedFaces = ref([])
@@ -596,6 +1316,334 @@ const recognitionSettings = ref({
   mode: '1:N'
 })
 
+// 门禁管理相关变量
+const gateSearchKeyword = ref('')
+const gateStatusFilter = ref('')
+const gateAreaFilter = ref('')
+const selectedGates = ref([])
+const gatesLoading = ref(false)
+const gatesPage = ref(1)
+const gatesPageSize = ref(10)
+
+// 门禁管理
+const gatesList = ref([
+  { id: 'GATE001', name: 'A区大门', location: 'A区入口', type: '门禁闸机', deviceId: 'CAM001', status: 'active', lastMaintenance: '2024-03-15', todayAccessCount: 86 },
+  { id: 'GATE002', name: 'B区大门', location: 'B区入口', type: '门禁闸机', deviceId: 'CAM002', status: 'active', lastMaintenance: '2024-03-10', todayAccessCount: 64 },
+  { id: 'GATE003', name: 'C区大门', location: 'C区入口', type: '门禁闸机', deviceId: 'CAM003', status: 'inactive', lastMaintenance: '2024-03-08', todayAccessCount: 0 },
+  { id: 'GATE004', name: 'D区大门', location: 'D区入口', type: '门禁闸机', deviceId: 'CAM004', status: 'active', lastMaintenance: '2024-03-12', todayAccessCount: 52 },
+  { id: 'GATE005', name: '研发部门', location: 'A区2楼', type: '智能门锁', deviceId: '', status: 'active', lastMaintenance: '2024-03-14', todayAccessCount: 37 },
+  { id: 'GATE006', name: '财务部门', location: 'B区1楼', type: '智能门锁', deviceId: '', status: 'active', lastMaintenance: '2024-03-16', todayAccessCount: 23 },
+  { id: 'GATE007', name: '机房', location: 'C区地下室', type: '人脸门禁', deviceId: '', status: 'active', lastMaintenance: '2024-03-18', todayAccessCount: 12 },
+  { id: 'GATE008', name: '会议室A', location: 'A区1楼', type: '智能门锁', deviceId: '', status: 'active', lastMaintenance: '2024-03-17', todayAccessCount: 28 },
+  { id: 'GATE009', name: '会议室B', location: 'B区2楼', type: '智能门锁', deviceId: '', status: 'active', lastMaintenance: '2024-03-16', todayAccessCount: 15 },
+  { id: 'GATE010', name: '食堂', location: 'D区1楼', type: '门禁闸机', deviceId: '', status: 'active', lastMaintenance: '2024-03-14', todayAccessCount: 95 },
+  { id: 'GATE011', name: '档案室', location: 'B区地下室', type: '人脸门禁', deviceId: '', status: 'active', lastMaintenance: '2024-03-13', todayAccessCount: 8 },
+  { id: 'GATE012', name: '实验室', location: 'C区3楼', type: '指纹门禁', deviceId: '', status: 'active', lastMaintenance: '2025-05-12', todayAccessCount: 14 },
+  { id: 'GATE013', name: '总经理办公室', location: 'A区3楼', type: '人脸门禁', deviceId: '', status: 'active', lastMaintenance: '2025-05-15', todayAccessCount: 6 },
+  { id: 'GATE014', name: '停车场入口', location: 'E区地面', type: '车牌识别', deviceId: '', status: 'active', lastMaintenance: '2025-05-10', todayAccessCount: 78 },
+  { id: 'GATE015', name: '停车场出口', location: 'E区地面', type: '车牌识别', deviceId: '', status: 'active', lastMaintenance: '2025-05-10', todayAccessCount: 72 },
+  { id: 'GATE016', name: '仓库A', location: 'D区地下室', type: '智能门锁', deviceId: '', status: 'inactive', lastMaintenance: '2025-05-25', todayAccessCount: 0 },
+  { id: 'GATE017', name: '仓库B', location: 'D区地下室', type: '智能门锁', deviceId: '', status: 'active', lastMaintenance: '2025-05-20', todayAccessCount: 9 },
+  { id: 'GATE018', name: '楼顶天台', location: 'A区顶层', type: '指纹门禁', deviceId: '', status: 'inactive', lastMaintenance: '2025-05-15', todayAccessCount: 0 },
+])
+
+// 权限规则相关变量
+const ruleSearchKeyword = ref('')
+const ruleStatusFilter = ref('')
+const selectedRules = ref([])
+const rulesLoading = ref(false)
+const rulesPage = ref(1)
+const rulesPageSize = ref(10)
+
+// 访问日志相关变量
+const accessLogFilter = ref({
+  dateRange: [],
+  gate: '',
+  result: ''
+})
+const accessLogPage = ref(1)
+const accessLogPageSize = ref(10)
+
+// 访问日志
+const accessLogs = ref([
+  { 
+    id: 1,
+    time: '2024-03-20 08:45:22', 
+    name: '张伟', 
+    gateName: 'A区大门',
+    gateId: 'GATE001', 
+    department: '研发部',
+    result: 'allow',
+    reason: '符合部门通行规则',
+    direction: '进入',
+    verifyType: '人脸识别'
+  },
+  { 
+    id: 2,
+    time: '2024-03-20 08:50:15', 
+    name: '王丽', 
+    gateName: 'B区大门', 
+    gateId: 'GATE002',
+    department: '财务部',
+    result: 'allow',
+    reason: '符合部门通行规则',
+    direction: '进入',
+    verifyType: '人脸识别'
+  },
+  { 
+    id: 3,
+    time: '2024-03-20 09:05:30', 
+    name: '未知人员', 
+    gateName: 'C区大门', 
+    gateId: 'GATE003',
+    department: '-',
+    result: 'deny',
+    reason: '未识别身份',
+    direction: '进入',
+    verifyType: '人脸识别'
+  },
+  { 
+    id: 4,
+    time: '2024-03-20 09:12:45', 
+    name: '刘强', 
+    gateName: 'A区大门', 
+    gateId: 'GATE001',
+    department: '安保部',
+    result: 'allow',
+    reason: '符合安保人员通行规则',
+    direction: '进入',
+    verifyType: '人脸识别'
+  },
+  { 
+    id: 5,
+    time: '2024-03-20 09:30:18', 
+    name: '李明', 
+    gateName: 'A区大门', 
+    gateId: 'GATE001',
+    department: '外部',
+    result: 'allow',
+    reason: '符合访客通行规则',
+    direction: '进入',
+    verifyType: '人脸识别'
+  },
+  { 
+    id: 6,
+    time: '2024-03-20 10:15:06', 
+    name: '赵刚', 
+    gateName: '机房', 
+    gateId: 'GATE007',
+    department: '研发部',
+    result: 'allow',
+    reason: '符合管理层特权规则',
+    direction: '进入',
+    verifyType: '人脸识别'
+  },
+  { 
+    id: 7,
+    time: '2024-03-20 11:35:29', 
+    name: '陈美', 
+    gateName: '研发部门', 
+    gateId: 'GATE005',
+    department: '市场部',
+    result: 'deny',
+    reason: '不符合门禁权限规则',
+    direction: '进入',
+    verifyType: '人脸识别'
+  },
+  { 
+    id: 8,
+    time: '2025-05-20 14:22:10', 
+    name: '张红', 
+    gateName: 'B区大门', 
+    gateId: 'GATE002',
+    department: '人事部',
+    result: 'deny',
+    reason: '无权限访问此区域',
+    direction: '进入',
+    verifyType: '人脸识别'
+  },
+])
+
+// 紧急操作记录
+const emergencyLogs = ref([
+  {
+    id: 1,
+    time: '2025-05-15 14:30:22',
+    operator: '系统管理员',
+    action: '全部解锁',
+    reason: '消防演习',
+    duration: '30分钟',
+    affectedGates: '全部'
+  },
+  {
+    id: 2,
+    time: '2025-05-10 10:15:47',
+    operator: '安保主管',
+    action: '全部锁定',
+    reason: '安全事件演练',
+    duration: '45分钟',
+    affectedGates: '全部'
+  },
+  {
+    id: 3,
+    time: '2025-05-05 08:20:33',
+    operator: '系统管理员',
+    action: '恢复正常',
+    reason: '演习结束',
+    duration: '-',
+    affectedGates: '全部'
+  },
+  {
+    id: 4,
+    time: '2025-05-01 15:45:12',
+    operator: '李主管',
+    action: '全部解锁',
+    reason: '紧急疏散演练',
+    duration: '25分钟',
+    affectedGates: '全部'
+  },
+  {
+    id: 5,
+    time: '2025-05-01 09:30:55',
+    operator: '张经理',
+    action: '部分锁定',
+    reason: '区域隔离测试',
+    duration: '60分钟',
+    affectedGates: 'A区, B区'
+  },
+  {
+    id: 6,
+    time: '2025-05-01 16:20:18',
+    operator: '系统管理员',
+    action: '恢复正常',
+    reason: '测试完成',
+    duration: '-',
+    affectedGates: '全部'
+  }
+])
+
+// 紧急控制相关变量
+const emergencyStatus = ref('normal') // 'normal', 'unlock', 'lock'
+const emergencyStartTime = ref('')
+const emergencyOperator = ref('')
+const emergencyReason = ref('')
+const emergencyLogsLoading = ref(false)
+const emergencyLogsPage = ref(1)
+const emergencyLogsPageSize = ref(10)
+
+// 访问日志过滤计算属性
+const filteredAccessLogs = computed(() => {
+  let result = [...accessLogs.value];
+  
+  if (accessLogFilter.value.person) {
+    const keyword = accessLogFilter.value.person.toLowerCase();
+    result = result.filter(log => log.name.toLowerCase().includes(keyword));
+  }
+  
+  if (accessLogFilter.value.gate) {
+    result = result.filter(log => log.gateId === accessLogFilter.value.gate);
+  }
+  
+  if (accessLogFilter.value.result) {
+    result = result.filter(log => log.result === accessLogFilter.value.result);
+  }
+  
+  return result;
+});
+
+// 获取紧急状态文本
+const getEmergencyStatusText = () => {
+  const statusTexts = {
+    'normal': '正常运行',
+    'unlock': '紧急解锁模式',
+    'lock': '紧急锁定模式'
+  };
+  return statusTexts[emergencyStatus.value] || '未知状态';
+}
+
+// 刷新紧急日志
+const refreshEmergencyLogs = () => {
+  emergencyLogsLoading.value = true;
+  setTimeout(() => {
+    emergencyLogsLoading.value = false;
+    ElMessage.success('紧急操作记录已刷新');
+  }, 500);
+}
+
+// 导出紧急日志
+const exportEmergencyLogs = () => {
+  ElMessage.success('紧急操作记录导出成功');
+  // 实际应用中应该调用API导出数据
+}
+
+// 处理紧急控制
+const handleEmergencyUnlock = () => {
+  ElMessageBox.confirm(
+    '确认执行紧急解锁操作吗？此操作将解锁所有门禁！',
+    '紧急控制确认',
+    {
+      confirmButtonText: '确认',
+      cancelButtonText: '取消',
+      type: 'warning'
+    }
+  ).then(() => {
+    ElMessageBox.prompt('请输入紧急解锁原因', '操作原因', {
+      confirmButtonText: '确认',
+      cancelButtonText: '取消',
+    }).then(({ value }) => {
+      emergencyStatus.value = 'unlock';
+      emergencyStartTime.value = new Date().toLocaleString();
+      emergencyOperator.value = '当前用户';
+      emergencyReason.value = value;
+      ElMessage.success('已执行紧急解锁操作');
+      // 实际应用中应该调用API并记录日志
+    }).catch(() => {})
+  }).catch(() => {})
+}
+
+const handleEmergencyLock = () => {
+  ElMessageBox.confirm(
+    '确认执行紧急锁定操作吗？此操作将锁定所有门禁！',
+    '紧急控制确认',
+    {
+      confirmButtonText: '确认',
+      cancelButtonText: '取消',
+      type: 'danger'
+    }
+  ).then(() => {
+    ElMessageBox.prompt('请输入紧急锁定原因', '操作原因', {
+      confirmButtonText: '确认',
+      cancelButtonText: '取消',
+    }).then(({ value }) => {
+      emergencyStatus.value = 'lock';
+      emergencyStartTime.value = new Date().toLocaleString();
+      emergencyOperator.value = '当前用户';
+      emergencyReason.value = value;
+      ElMessage.success('已执行紧急锁定操作');
+      // 实际应用中应该调用API并记录日志
+    }).catch(() => {})
+  }).catch(() => {})
+}
+
+const handleEmergencyReset = () => {
+  ElMessageBox.confirm(
+    '确认恢复门禁系统到正常状态吗？',
+    '操作确认',
+    {
+      confirmButtonText: '确认',
+      cancelButtonText: '取消',
+      type: 'info'
+    }
+  ).then(() => {
+    emergencyStatus.value = 'normal';
+    emergencyStartTime.value = '';
+    emergencyOperator.value = '';
+    emergencyReason.value = '';
+    ElMessage.success('门禁系统已恢复正常状态');
+    // 实际应用中应该调用API并记录日志
+  }).catch(() => {})
+}
+
 // 过滤后的人脸库数据
 const filteredFaceLibrary = computed(() => {
   let result = [...faceLibrary.value];
@@ -611,6 +1659,29 @@ const filteredFaceLibrary = computed(() => {
   
   if (departmentFilter.value) {
     result = result.filter(item => item.department === departmentFilter.value);
+  }
+  
+  return result;
+});
+
+// 过滤门禁列表
+const filteredGatesList = computed(() => {
+  let result = [...gatesList.value];
+  
+  if (gateSearchKeyword.value) {
+    const keyword = gateSearchKeyword.value.toLowerCase();
+    result = result.filter(gate => 
+      gate.name.toLowerCase().includes(keyword) || 
+      gate.location.toLowerCase().includes(keyword)
+    );
+  }
+  
+  if (gateStatusFilter.value) {
+    result = result.filter(gate => gate.status === gateStatusFilter.value);
+  }
+  
+  if (gateAreaFilter.value) {
+    result = result.filter(gate => gate.location.includes(gateAreaFilter.value));
   }
   
   return result;
@@ -749,9 +1820,231 @@ const saveSettings = () => {
   showSettings.value = false;
 }
 
+// 处理门禁点相关操作
+const handleAddGate = () => {
+  ElMessage.info('打开添加门禁点对话框')
+}
+
+const handleEditGate = (gate) => {
+  ElMessage.info(`编辑门禁点: ${gate.name}`)
+}
+
+const handleToggleGateStatus = (gate) => {
+  const newStatus = gate.status === 'active' ? 'inactive' : 'active'
+  ElMessageBox.confirm(
+    `确认${newStatus === 'active' ? '启用' : '禁用'}门禁点 "${gate.name}" 吗？`,
+    '状态变更确认',
+    {
+      confirmButtonText: '确认',
+      cancelButtonText: '取消',
+      type: 'warning'
+    }
+  ).then(() => {
+    gate.status = newStatus
+    ElMessage.success(`门禁点"${gate.name}"已${newStatus === 'active' ? '启用' : '禁用'}`)
+  }).catch(() => {})
+}
+
+const handleGatePermission = (gate) => {
+  ElMessage.info(`配置门禁点权限: ${gate.name}`)
+}
+
+const handleGateLog = (gate) => {
+  ElMessage.info(`查看门禁点访问记录: ${gate.name}`)
+  accessControlActiveTab.value = 'logs'
+  accessLogFilter.value.gate = gate.id
+  handleFilterAccessLogs()
+}
+
+// 处理规则相关操作
+const handleAddRule = () => {
+  ElMessage.info('打开添加规则对话框')
+}
+
+const handleEditRule = (rule) => {
+  ElMessage.info(`编辑规则: ${rule.name}`)
+}
+
+const handleToggleRuleStatus = (rule) => {
+  const newStatus = rule.status === 'active' ? 'inactive' : 'active'
+  ElMessageBox.confirm(
+    `确认${newStatus === 'active' ? '启用' : '禁用'}规则 "${rule.name}" 吗？`,
+    '状态变更确认',
+    {
+      confirmButtonText: '确认',
+      cancelButtonText: '取消',
+      type: 'warning'
+    }
+  ).then(() => {
+    rule.status = newStatus
+    ElMessage.success(`规则"${rule.name}"已${newStatus === 'active' ? '启用' : '禁用'}`)
+  }).catch(() => {})
+}
+
+const handleDeleteRule = (rule) => {
+  ElMessageBox.confirm(
+    `确认删除规则 "${rule.name}" 吗？此操作不可恢复！`,
+    '删除确认',
+    {
+      confirmButtonText: '确认',
+      cancelButtonText: '取消',
+      type: 'danger'
+    }
+  ).then(() => {
+    ElMessage.success(`规则"${rule.name}"已删除`)
+    // 实际应用中应该从数组中删除并调用API
+  }).catch(() => {})
+}
+
+// 处理访问日志过滤
+const handleFilterAccessLogs = () => {
+  ElMessage.success('访问记录过滤成功')
+  // 实际应用中应该根据过滤条件请求API
+}
+
+const resetAccessLogFilter = () => {
+  accessLogFilter.value = {
+    dateRange: [],
+    gate: '',
+    result: ''
+  }
+  handleFilterAccessLogs()
+}
+
+// 辅助函数
+const getTagType = (type) => {
+  const types = {
+    'department': 'primary',
+    'person': 'success',
+    'time': 'warning'
+  }
+  return types[type] || 'info'
+}
+
+const getRuleTypeText = (type) => {
+  const texts = {
+    'department': '部门规则',
+    'person': '个人规则',
+    'time': '时间规则'
+  }
+  return texts[type] || '未知规则'
+}
+
+const getEmergencyTagType = (action) => {
+  if (action === '全部解锁') return 'success'
+  if (action === '全部锁定') return 'danger'
+  if (action === '恢复正常') return 'info'
+  return 'warning'
+}
+
+// 获取启用门禁数量
+const getActiveGatesCount = () => {
+  return gatesList.value.filter(gate => gate.status === 'active').length;
+}
+
+// 获取禁用门禁数量
+const getInactiveGatesCount = () => {
+  return gatesList.value.filter(gate => gate.status === 'inactive').length;
+}
+
+// 处理门禁选择
+const handleGateSelectionChange = (selection) => {
+  selectedGates.value = selection;
+}
+
+// 处理批量删除门禁
+const handleBatchDeleteGates = () => {
+  if (selectedGates.value.length === 0) return;
+  
+  ElMessageBox.confirm(
+    `确认删除选中的 ${selectedGates.value.length} 个门禁点吗？此操作不可恢复！`,
+    '批量删除确认',
+    {
+      confirmButtonText: '确认',
+      cancelButtonText: '取消',
+      type: 'warning'
+    }
+  ).then(() => {
+    // 实际应用中应该调用API删除数据
+    ElMessage.success(`成功删除 ${selectedGates.value.length} 个门禁点`);
+    selectedGates.value = [];
+  }).catch(() => {});
+}
+
+// 获取门禁类型对应的标签类型
+const getGateTypeTag = (type) => {
+  const types = {
+    '门禁闸机': 'primary',
+    '智能门锁': 'success',
+    '人脸门禁': 'warning',
+    '指纹门禁': 'info',
+    '车牌识别': 'danger'
+  };
+  return types[type] || 'info';
+}
+
+// 初始化门禁分布图表
+const initGatesDistributionChart = () => {
+  // 实际应用中应该引入并使用echarts
+  console.log('初始化门禁分布图表');
+}
+
+// 权限规则相关变量
+const ruleTypeFilter = ref('')
+const filteredRules = computed(() => {
+  let result = [...accessRules.value];
+  
+  if (ruleSearchKeyword.value) {
+    const keyword = ruleSearchKeyword.value.toLowerCase();
+    result = result.filter(rule => 
+      rule.name.toLowerCase().includes(keyword) || 
+      rule.target.toLowerCase().includes(keyword)
+    );
+  }
+  
+  if (ruleTypeFilter.value) {
+    result = result.filter(rule => rule.type === ruleTypeFilter.value);
+  }
+  
+  if (ruleStatusFilter.value) {
+    result = result.filter(rule => rule.status === ruleStatusFilter.value);
+  }
+  
+  return result;
+});
+
+// 处理规则选择
+const handleRuleSelectionChange = (selection) => {
+  selectedRules.value = selection;
+}
+
+// 处理批量删除规则
+const handleBatchDeleteRules = () => {
+  if (selectedRules.value.length === 0) return;
+  
+  ElMessageBox.confirm(
+    `确认删除选中的 ${selectedRules.value.length} 条规则吗？此操作不可恢复！`,
+    '批量删除确认',
+    {
+      confirmButtonText: '确认',
+      cancelButtonText: '取消',
+      type: 'warning'
+    }
+  ).then(() => {
+    // 实际应用中应该调用API删除数据
+    ElMessage.success(`成功删除 ${selectedRules.value.length} 条规则`);
+    selectedRules.value = [];
+  }).catch(() => {});
+}
+
 // 页面加载
 onMounted(() => {
   console.log('人脸识别管理页面加载完成');
+  
+  // 延迟加载图表，确保DOM已经渲染
+  setTimeout(() => {
+    initGatesDistributionChart();
+  }, 500);
 })
 </script>
 
@@ -890,5 +2183,182 @@ onMounted(() => {
   .stat-panel .el-col {
     margin-bottom: 16px;
   }
+}
+
+/* 紧急控制样式 */
+.emergency-card {
+  margin-bottom: 20px;
+}
+
+.warning-card {
+  border: 1px solid #e6a23c;
+}
+
+.emergency-header {
+  display: flex;
+  align-items: center;
+}
+
+.emergency-header h4 {
+  margin: 0;
+  color: #e6a23c;
+  display: flex;
+  align-items: center;
+}
+
+.emergency-header h4 .el-icon {
+  margin-right: 8px;
+}
+
+.emergency-warning {
+  background-color: #fdf6ec;
+  padding: 10px 15px;
+  border-radius: 4px;
+  margin-bottom: 20px;
+  border-left: 4px solid #e6a23c;
+}
+
+.emergency-warning p {
+  margin: 0;
+  color: #e6a23c;
+}
+
+.emergency-action-card {
+  text-align: center;
+  height: 100%;
+}
+
+.emergency-action-card h5 {
+  margin-top: 0;
+  margin-bottom: 10px;
+  font-size: 16px;
+}
+
+.emergency-action-card p {
+  margin-bottom: 20px;
+  color: #606266;
+  font-size: 14px;
+}
+
+.emergency-action-card .el-button {
+  width: 100%;
+}
+
+/* 门禁管理样式 */
+.dashboard-cards {
+  margin-bottom: 20px;
+}
+
+.operation-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.left-actions, .right-search {
+  display: flex;
+  align-items: center;
+}
+
+.gates-chart-container {
+  margin-top: 20px;
+  background-color: #fff;
+  padding: 15px;
+  border-radius: 4px;
+  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
+}
+
+.stat-title {
+  display: flex;
+  align-items: center;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.stat-title .el-icon {
+  margin-right: 8px;
+}
+
+.progress-container {
+  width: 100%;
+}
+
+.progress-label {
+  margin-bottom: 5px;
+  font-size: 12px;
+  color: #606266;
+}
+
+/* 图表容器 */
+.logs-chart-container {
+  margin-top: 20px;
+  background-color: #fff;
+  padding: 15px;
+  border-radius: 4px;
+  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
+}
+
+/* 紧急控制样式增强 */
+.emergency-status-card {
+  margin-bottom: 20px;
+  border-color: #409EFF;
+}
+
+.emergency-status-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.emergency-status-header h4 {
+  margin: 0;
+  font-size: 16px;
+}
+
+.emergency-status-content {
+  padding: 10px 0;
+}
+
+.status-detail {
+  display: flex;
+  flex-wrap: wrap;
+  margin-bottom: 15px;
+}
+
+.detail-item {
+  margin-right: 30px;
+  margin-bottom: 10px;
+}
+
+.detail-item .label {
+  font-weight: bold;
+  margin-right: 8px;
+  color: #606266;
+}
+
+.detail-item .value {
+  color: #303133;
+}
+
+.active-card {
+  border-color: #409EFF;
+  box-shadow: 0 0 8px rgba(64, 158, 255, 0.4);
+}
+
+.logs-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.logs-header h4 {
+  margin: 0;
+  font-size: 16px;
+}
+
+.logs-actions {
+  display: flex;
+  gap: 10px;
 }
 </style> 

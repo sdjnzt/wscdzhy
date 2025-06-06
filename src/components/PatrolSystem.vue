@@ -55,7 +55,7 @@
                   </div>
                 </div>
               </template>
-              <el-table :data="planList" style="width: 100%">
+              <el-table :data="paginatedPlans" style="width: 100%">
                 <el-table-column prop="name" label="计划名称" />
                 <el-table-column prop="type" label="巡更类型" />
                 <el-table-column prop="patroller" label="巡更人员" />
@@ -109,7 +109,7 @@
                     </div>
                   </template>
                   <div class="patrol-content">
-                    <el-table :data="realtimeRecords" style="width: 100%">
+                    <el-table :data="paginatedRecords" style="width: 100%">
                       <el-table-column prop="time" label="巡更时间" width="180" />
                       <el-table-column prop="point" label="巡更点" />
                       <el-table-column prop="patroller" label="巡更人员" />
@@ -171,7 +171,7 @@
                   </div>
                 </div>
               </template>
-              <el-table :data="historyRecords" style="width: 100%">
+              <el-table :data="paginatedRecords" style="width: 100%">
                 <el-table-column prop="time" label="巡更时间" width="180" />
                 <el-table-column prop="plan" label="巡更计划" />
                 <el-table-column prop="patroller" label="巡更人员" />
@@ -271,13 +271,14 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, computed, watch } from 'vue'
 import {
   VideoPlay,
   VideoPause,
   Search,
   Download
 } from '@element-plus/icons-vue'
+import { ElMessage, ElMessageBox } from 'element-plus'
 
 // 搜索关键词
 const searchKeyword = ref('')
@@ -325,7 +326,9 @@ const pointGroups = ref([
         id: 'A001',
         name: 'A区大门',
         location: 'A区大门',
-        lastCheck: '2024-03-20 10:00:00'
+        lastCheck: '2024-03-20 10:00:00',
+        battery: '90%',
+        signal: '强'
       },
       {
         label: 'A区走廊',
@@ -334,7 +337,31 @@ const pointGroups = ref([
         id: 'A002',
         name: 'A区走廊',
         location: 'A区走廊',
-        lastCheck: '2024-03-20 10:00:00'
+        lastCheck: '2024-03-20 10:00:00',
+        battery: '85%',
+        signal: '中'
+      },
+      {
+        label: 'A区会议室',
+        type: 'point',
+        status: 'normal',
+        id: 'A003',
+        name: 'A区会议室',
+        location: 'A区会议室',
+        lastCheck: '2024-03-20 10:00:00',
+        battery: '95%',
+        signal: '强'
+      },
+      {
+        label: 'A区休息区',
+        type: 'point',
+        status: 'normal',
+        id: 'A004',
+        name: 'A区休息区',
+        location: 'A区休息区',
+        lastCheck: '2024-03-20 10:00:00',
+        battery: '88%',
+        signal: '中'
       }
     ]
   },
@@ -348,7 +375,69 @@ const pointGroups = ref([
         id: 'B001',
         name: 'B区大门',
         location: 'B区大门',
-        lastCheck: '2024-03-20 09:30:00'
+        lastCheck: '2024-03-20 09:30:00',
+        battery: '0%',
+        signal: '无'
+      },
+      {
+        label: 'B区走廊',
+        type: 'point',
+        status: 'normal',
+        id: 'B002',
+        name: 'B区走廊',
+        location: 'B区走廊',
+        lastCheck: '2024-03-20 10:00:00',
+        battery: '75%',
+        signal: '弱'
+      },
+      {
+        label: 'B区设备间',
+        type: 'point',
+        status: 'normal',
+        id: 'B003',
+        name: 'B区设备间',
+        location: 'B区设备间',
+        lastCheck: '2024-03-20 10:00:00',
+        battery: '82%',
+        signal: '中'
+      }
+    ]
+  },
+  {
+    label: 'C区巡更点',
+    children: [
+      {
+        label: 'C区大门',
+        type: 'point',
+        status: 'normal',
+        id: 'C001',
+        name: 'C区大门',
+        location: 'C区大门',
+        lastCheck: '2024-03-20 10:00:00',
+        battery: '92%',
+        signal: '强'
+      },
+      {
+        label: 'C区走廊',
+        type: 'point',
+        status: 'normal',
+        id: 'C002',
+        name: 'C区走廊',
+        location: 'C区走廊',
+        lastCheck: '2024-03-20 10:00:00',
+        battery: '78%',
+        signal: '中'
+      },
+      {
+        label: 'C区仓库',
+        type: 'point',
+        status: 'normal',
+        id: 'C003',
+        name: 'C区仓库',
+        location: 'C区仓库',
+        lastCheck: '2024-03-20 10:00:00',
+        battery: '85%',
+        signal: '强'
       }
     ]
   }
@@ -358,72 +447,157 @@ const pointGroups = ref([
 const pointList = ref([
   { id: 'A001', name: 'A区大门' },
   { id: 'A002', name: 'A区走廊' },
-  { id: 'B001', name: 'B区大门' }
+  { id: 'A003', name: 'A区会议室' },
+  { id: 'A004', name: 'A区休息区' },
+  { id: 'B001', name: 'B区大门' },
+  { id: 'B002', name: 'B区走廊' },
+  { id: 'B003', name: 'B区设备间' },
+  { id: 'C001', name: 'C区大门' },
+  { id: 'C002', name: 'C区走廊' },
+  { id: 'C003', name: 'C区仓库' }
 ])
 
-// 树形配置
-const defaultProps = {
-  children: 'children',
-  label: 'label'
-}
+// 巡更人员列表
+const patrollerList = ref([
+  { id: 'P001', name: '王建国', phone: '13905311234', department: '安保部' },
+  { id: 'P002', name: '张丽华', phone: '13805322345', department: '安保部' },
+  { id: 'P003', name: '刘志强', phone: '13705333456', department: '安保部' },
+  { id: 'P004', name: '周晓明', phone: '13605344567', department: '安保部' }
+])
 
 // 计划列表
 const planList = ref([
   {
     name: '早班巡更',
     type: 'daily',
-    patroller: '张三',
+    patroller: '王建国',
     startTime: '08:00',
     endTime: '16:00',
-    status: 'pending'
+    status: 'pending',
+    points: ['A001', 'A002', 'A003', 'A004'],
+    remark: '日常巡更，重点关注设备间和仓库'
   },
   {
     name: '晚班巡更',
     type: 'daily',
-    patroller: '李四',
+    patroller: '张丽华',
     startTime: '16:00',
     endTime: '24:00',
-    status: 'completed'
+    status: 'completed',
+    points: ['B001', 'B002', 'B003'],
+    remark: '日常巡更，确保所有区域安全'
+  },
+  {
+    name: '重点区域巡更',
+    type: 'important',
+    patroller: '刘志强',
+    startTime: '10:00',
+    endTime: '12:00',
+    status: 'running',
+    points: ['C001', 'C002', 'C003'],
+    remark: '重点检查仓库和设备间'
+  },
+  {
+    name: '临时巡更',
+    type: 'temporary',
+    patroller: '周晓明',
+    startTime: '14:00',
+    endTime: '16:00',
+    status: 'pending',
+    points: ['A001', 'B001', 'C001'],
+    remark: '临时检查各区域大门'
   }
 ])
 
 // 实时记录
 const realtimeRecords = ref([
   {
-    time: '2024-03-20 10:00:00',
+    time: '2025-05-20 10:00:00',
     point: 'A区大门',
-    patroller: '张三',
+    patroller: '王建国',
     status: 'normal',
-    remark: '一切正常'
+    remark: '一切正常，大门安全'
   },
   {
-    time: '2024-03-20 10:05:00',
+    time: '2025-05-20 10:05:00',
     point: 'A区走廊',
-    patroller: '张三',
+    patroller: '王建国',
     status: 'normal',
-    remark: '一切正常'
+    remark: '走廊照明正常，无异常'
+  },
+  {
+    time: '2025-05-20 10:10:00',
+    point: 'A区会议室',
+    patroller: '王建国',
+    status: 'normal',
+    remark: '会议室门窗已锁，设备正常'
+  },
+  {
+    time: '2025-05-20 10:15:00',
+    point: 'A区休息区',
+    patroller: '王建国',
+    status: 'normal',
+    remark: '休息区整洁，无异常'
   }
 ])
 
 // 历史记录
 const historyRecords = ref([
   {
-    time: '2024-03-20 09:00:00',
+    time: '2025-05-20 09:00:00',
     plan: '早班巡更',
-    patroller: '张三',
+    patroller: '王建国',
     point: 'A区大门',
     status: 'normal',
-    remark: '一切正常'
+    remark: '大门安全，无异常'
   },
   {
-    time: '2024-03-20 09:30:00',
+    time: '2025-05-20 09:30:00',
     plan: '早班巡更',
-    patroller: '张三',
+    patroller: '王建国',
     point: 'B区大门',
     status: 'abnormal',
-    remark: '发现异常情况'
+    remark: '发现大门未锁，已处理'
+  },
+  {
+    time: '2025-05-20 10:00:00',
+    plan: '早班巡更',
+    patroller: '王建国',
+    point: 'C区大门',
+    status: 'normal',
+    remark: '大门安全，无异常'
+  },
+  {
+    time: '2025-05-20 16:00:00',
+    plan: '晚班巡更',
+    patroller: '张丽华',
+    point: 'A区大门',
+    status: 'normal',
+    remark: '交接班正常，无异常'
+  },
+  {
+    time: '2025-05-20 16:30:00',
+    plan: '晚班巡更',
+    patroller: '张丽华',
+    point: 'B区大门',
+    status: 'normal',
+    remark: '大门安全，无异常'
   }
 ])
+
+// 计算当前页的数据
+const paginatedPlans = computed(() => {
+  const start = (currentPage.value - 1) * pageSize.value
+  const end = start + pageSize.value
+  return planList.value.slice(start, end)
+})
+
+// 计算当前页的记录数据
+const paginatedRecords = computed(() => {
+  const start = (currentPage.value - 1) * pageSize.value
+  const end = start + pageSize.value
+  return activeTab.value === 'patrol' ? realtimeRecords.value.slice(start, end) : historyRecords.value.slice(start, end)
+})
 
 // 获取状态类型
 const getStatusType = (status) => {
@@ -485,7 +659,21 @@ const handleEditPlan = (plan) => {
 
 // 删除计划
 const handleDeletePlan = (plan) => {
-  console.log('删除计划:', plan)
+  ElMessageBox.confirm(
+    `确定要删除计划"${plan.name}"吗？`,
+    '警告',
+    {
+      confirmButtonText: '确定',
+      cancelButtonText: '取消',
+      type: 'warning',
+    }
+  ).then(() => {
+    const index = planList.value.findIndex(p => p.name === plan.name)
+    if (index > -1) {
+      planList.value.splice(index, 1)
+      ElMessage.success('删除成功')
+    }
+  }).catch(() => {})
 }
 
 // 开始计划
@@ -495,7 +683,33 @@ const handleStartPlan = (plan) => {
 
 // 保存计划
 const handleSavePlan = () => {
-  console.log('保存计划:', planForm.value)
+  // 表单验证
+  if (!planForm.value.name || !planForm.value.type || !planForm.value.patroller || !planForm.value.timeRange || !planForm.value.points.length) {
+    ElMessage.error('请填写完整信息')
+    return
+  }
+
+  if (dialogType.value === 'add') {
+    // 添加新计划
+    planList.value.unshift({
+      ...planForm.value,
+      startTime: planForm.value.timeRange[0],
+      endTime: planForm.value.timeRange[1],
+      status: 'pending'
+    })
+    ElMessage.success('添加成功')
+  } else {
+    // 更新计划
+    const index = planList.value.findIndex(p => p.name === planForm.value.name)
+    if (index > -1) {
+      planList.value[index] = {
+        ...planForm.value,
+        startTime: planForm.value.timeRange[0],
+        endTime: planForm.value.timeRange[1]
+      }
+      ElMessage.success('更新成功')
+    }
+  }
   showPlanDialog.value = false
 }
 
@@ -523,7 +737,28 @@ const handleImport = () => {
 
 // 导出数据
 const handleExport = () => {
-  console.log('导出数据')
+  // 准备导出数据
+  const exportData = activeTab.value === 'plans' ? planList.value.map(plan => ({
+    '计划名称': plan.name,
+    '巡更类型': plan.type === 'daily' ? '日常巡更' : plan.type === 'important' ? '重点巡更' : '临时巡更',
+    '巡更人员': plan.patroller,
+    '开始时间': plan.startTime,
+    '结束时间': plan.endTime,
+    '状态': getStatusText(plan.status),
+    '备注': plan.remark
+  })) : historyRecords.value.map(record => ({
+    '巡更时间': record.time,
+    '巡更计划': record.plan,
+    '巡更人员': record.patroller,
+    '巡更点': record.point,
+    '状态': record.status === 'normal' ? '正常' : '异常',
+    '备注': record.remark
+  }))
+
+  // 模拟导出过程
+  setTimeout(() => {
+    ElMessage.success('导出成功')
+  }, 1000)
 }
 
 // 处理日期变化
@@ -533,13 +768,28 @@ const handleDateChange = (val) => {
 
 // 处理分页大小变化
 const handleSizeChange = (val) => {
-  console.log('每页条数:', val)
+  pageSize.value = val
+  currentPage.value = 1
+  total.value = activeTab.value === 'plans' ? planList.value.length : 
+                activeTab.value === 'patrol' ? realtimeRecords.value.length : 
+                historyRecords.value.length
 }
 
 // 处理页码变化
 const handleCurrentChange = (val) => {
-  console.log('当前页:', val)
+  currentPage.value = val
 }
+
+// 监听标签页变化
+watch(activeTab, (newTab) => {
+  currentPage.value = 1
+  total.value = newTab === 'plans' ? planList.value.length : 
+                newTab === 'patrol' ? realtimeRecords.value.length : 
+                historyRecords.value.length
+})
+
+// 初始化总数
+total.value = planList.value.length
 </script>
 
 <style scoped>

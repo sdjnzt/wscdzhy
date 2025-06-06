@@ -54,7 +54,7 @@
                   </div>
                 </div>
               </template>
-              <el-table :data="taskList" style="width: 100%">
+              <el-table :data="paginatedTasks" style="width: 100%">
                 <el-table-column prop="name" label="任务名称" />
                 <el-table-column prop="type" label="广播类型" />
                 <el-table-column prop="content" label="广播内容" show-overflow-tooltip />
@@ -173,7 +173,7 @@
                   </div>
                 </div>
               </template>
-              <el-table :data="broadcastRecords" style="width: 100%">
+              <el-table :data="paginatedRecords" style="width: 100%">
                 <el-table-column prop="time" label="广播时间" width="180" />
                 <el-table-column prop="type" label="广播类型" />
                 <el-table-column prop="content" label="广播内容" show-overflow-tooltip />
@@ -256,7 +256,7 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, computed, watch } from 'vue'
 import {
   VideoPlay,
   VideoPause,
@@ -317,7 +317,9 @@ const deviceGroups = ref([
         id: 'A001',
         name: 'A区主广播',
         location: 'A区大厅',
-        lastHeartbeat: '2024-03-20 10:00:00'
+        lastHeartbeat: '2024-03-20 10:00:00',
+        volume: 80,
+        signal: '强'
       },
       {
         label: 'A区副广播',
@@ -326,7 +328,20 @@ const deviceGroups = ref([
         id: 'A002',
         name: 'A区副广播',
         location: 'A区走廊',
-        lastHeartbeat: '2024-03-20 10:00:00'
+        lastHeartbeat: '2024-03-20 10:00:00',
+        volume: 75,
+        signal: '中'
+      },
+      {
+        label: 'A区会议室广播',
+        type: 'device',
+        status: 'online',
+        id: 'A003',
+        name: 'A区会议室广播',
+        location: 'A区会议室',
+        lastHeartbeat: '2024-03-20 10:00:00',
+        volume: 70,
+        signal: '强'
       }
     ]
   },
@@ -340,7 +355,47 @@ const deviceGroups = ref([
         id: 'B001',
         name: 'B区主广播',
         location: 'B区大厅',
-        lastHeartbeat: '2024-03-20 09:30:00'
+        lastHeartbeat: '2024-03-20 09:30:00',
+        volume: 0,
+        signal: '无'
+      },
+      {
+        label: 'B区走廊广播',
+        type: 'device',
+        status: 'online',
+        id: 'B002',
+        name: 'B区走廊广播',
+        location: 'B区走廊',
+        lastHeartbeat: '2024-03-20 10:00:00',
+        volume: 65,
+        signal: '弱'
+      }
+    ]
+  },
+  {
+    label: 'C区广播',
+    children: [
+      {
+        label: 'C区主广播',
+        type: 'device',
+        status: 'online',
+        id: 'C001',
+        name: 'C区主广播',
+        location: 'C区大厅',
+        lastHeartbeat: '2024-03-20 10:00:00',
+        volume: 85,
+        signal: '强'
+      },
+      {
+        label: 'C区休息区广播',
+        type: 'device',
+        status: 'online',
+        id: 'C002',
+        name: 'C区休息区广播',
+        location: 'C区休息区',
+        lastHeartbeat: '2024-03-20 10:00:00',
+        volume: 60,
+        signal: '中'
       }
     ]
   }
@@ -357,38 +412,122 @@ const taskList = ref([
   {
     name: '早间广播',
     type: 'voice',
-    content: '各位同事早上好，欢迎来到公司...',
-    schedule: '2024-03-20 08:00:00',
-    status: 'pending'
+    content: '各位同事早上好，欢迎来到公司，今天是2025年5月20日，星期三，天气晴朗，祝大家工作愉快！',
+    schedule: '2025-05-20 08:00:00',
+    status: 'completed',
+    areas: ['A区', 'B区', 'C区'],
+    duration: '2分钟'
   },
   {
     name: '午间音乐',
     type: 'music',
-    content: '播放轻音乐...',
-    schedule: '2024-03-20 12:00:00',
-    status: 'completed'
+    content: '播放轻音乐《春江花月夜》，音量适中，营造轻松氛围。',
+    schedule: '2025-05-20 12:00:00',
+    status: 'completed',
+    areas: ['A区', 'C区'],
+    duration: '30分钟'
+  },
+  {
+    name: '下午茶提醒',
+    type: 'voice',
+    content: '各位同事，下午茶时间到了，请到休息区享用茶点，放松一下。',
+    schedule: '2025-05-20 15:30:00',
+    status: 'pending',
+    areas: ['A区', 'B区', 'C区'],
+    duration: '1分钟'
+  },
+  {
+    name: '下班提醒',
+    type: 'voice',
+    content: '各位同事，下班时间到了，请收拾好个人物品，关闭电脑，注意安全。',
+    schedule: '2025-05-20 18:00:00',
+    status: 'pending',
+    areas: ['A区', 'B区', 'C区'],
+    duration: '1分钟'
+  },
+  {
+    name: '紧急通知',
+    type: 'emergency',
+    content: '紧急通知：请各部门负责人立即到会议室开会，有重要事项讨论。',
+    schedule: '2025-05-20 10:30:00',
+    status: 'playing',
+    areas: ['A区', 'B区', 'C区'],
+    duration: '1分钟'
+  },
+  {
+    name: '消防演练',
+    type: 'emergency',
+    content: '消防演练通知：今天下午3点将进行消防演练，请各部门做好准备。',
+    schedule: '2025-05-20 15:00:00',
+    status: 'pending',
+    areas: ['A区', 'B区', 'C区'],
+    duration: '2分钟'
   }
 ])
 
 // 广播记录
 const broadcastRecords = ref([
   {
-    time: '2024-03-20 08:00:00',
+    time: '2025-05-20 08:00:00',
     type: '语音广播',
-    content: '各位同事早上好，欢迎来到公司...',
-    areas: 'A区, B区',
-    duration: '5分钟',
-    status: 'success'
+    content: '各位同事早上好，欢迎来到公司，今天是2025年5月20日，星期三，天气晴朗，祝大家工作愉快！',
+    areas: 'A区, B区, C区',
+    duration: '2分钟',
+    status: 'success',
+    operator: '系统管理员'
   },
   {
-    time: '2024-03-20 12:00:00',
+    time: '2025-05-20 12:00:00',
     type: '音乐广播',
-    content: '播放轻音乐...',
-    areas: 'A区',
+    content: '播放轻音乐《春江花月夜》，音量适中，营造轻松氛围。',
+    areas: 'A区, C区',
     duration: '30分钟',
-    status: 'success'
+    status: 'success',
+    operator: '系统管理员'
+  },
+  {
+    time: '2025-05-20 10:30:00',
+    type: '紧急广播',
+    content: '紧急通知：请各部门负责人立即到会议室开会，有重要事项讨论。',
+    areas: 'A区, B区, C区',
+    duration: '1分钟',
+    status: 'success',
+    operator: '系统管理员'
+  },
+  {
+    time: '2025-05-20 09:00:00',
+    type: '语音广播',
+    content: '请各部门负责人到会议室参加晨会。',
+    areas: 'A区, B区',
+    duration: '1分钟',
+    status: 'success',
+    operator: '系统管理员'
+  },
+  {
+    time: '2025-05-20 11:30:00',
+    type: '音乐广播',
+    content: '播放背景音乐，音量适中。',
+    areas: 'B区, C区',
+    duration: '15分钟',
+    status: 'failed',
+    operator: '系统管理员',
+    failReason: '设备故障'
   }
 ])
+
+// 计算当前页的数据
+const paginatedRecords = computed(() => {
+  const start = (currentPage.value - 1) * pageSize.value
+  const end = start + pageSize.value
+  return broadcastRecords.value.slice(start, end)
+})
+
+// 计算当前页的任务数据
+const paginatedTasks = computed(() => {
+  const start = (currentPage.value - 1) * pageSize.value
+  const end = start + pageSize.value
+  return taskList.value.slice(start, end)
+})
 
 // 获取状态类型
 const getStatusType = (status) => {
@@ -493,13 +632,24 @@ const handleExport = () => {
 
 // 处理分页大小变化
 const handleSizeChange = (val) => {
-  console.log('每页条数:', val)
+  pageSize.value = val
+  currentPage.value = 1
+  total.value = activeTab.value === 'tasks' ? taskList.value.length : broadcastRecords.value.length
 }
 
 // 处理页码变化
 const handleCurrentChange = (val) => {
-  console.log('当前页:', val)
+  currentPage.value = val
 }
+
+// 监听标签页变化
+watch(activeTab, (newTab) => {
+  currentPage.value = 1
+  total.value = newTab === 'tasks' ? taskList.value.length : broadcastRecords.value.length
+})
+
+// 初始化总数
+total.value = taskList.value.length
 </script>
 
 <style scoped>

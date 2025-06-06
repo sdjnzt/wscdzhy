@@ -215,39 +215,98 @@ const showSettings = ref(false)
 // 设备分组数据
 const deviceGroups = ref([
   {
-    label: 'A区门禁',
+    label: '行政楼门禁',
     children: [
       {
-        label: 'A区大门',
+        label: '行政楼正门',
         type: 'device',
         status: 'online',
-        id: 'A001',
-        name: 'A区大门门禁',
-        location: 'A区大门',
-        lastHeartbeat: '2024-03-20 10:00:00'
+        id: 'XZ001',
+        name: '行政楼正门门禁',
+        location: '行政楼1层',
+        lastHeartbeat: '2025-05-20 08:30:00'
       },
       {
-        label: 'A区侧门',
+        label: '行政楼侧门',
         type: 'device',
-        status: 'offline',
-        id: 'A002',
-        name: 'A区侧门门禁',
-        location: 'A区侧门',
-        lastHeartbeat: '2024-03-20 09:30:00'
+        status: 'online',
+        id: 'XZ002',
+        name: '行政楼侧门门禁',
+        location: '行政楼1层',
+        lastHeartbeat: '2025-05-20 08:30:00'
+      },
+      {
+        label: '行政楼办公区',
+        type: 'device',
+        status: 'online',
+        id: 'XZ003',
+        name: '行政楼办公区门禁',
+        location: '行政楼2层',
+        lastHeartbeat: '2025-05-20 08:30:00'
       }
     ]
   },
   {
-    label: 'B区门禁',
+    label: '研发楼门禁',
     children: [
       {
-        label: 'B区大门',
+        label: '研发楼正门',
         type: 'device',
         status: 'online',
-        id: 'B001',
-        name: 'B区大门门禁',
-        location: 'B区大门',
-        lastHeartbeat: '2024-03-20 10:00:00'
+        id: 'YF001',
+        name: '研发楼正门门禁',
+        location: '研发楼1层',
+        lastHeartbeat: '2024-03-20 08:30:00'
+      },
+      {
+        label: '研发中心',
+        type: 'device',
+        status: 'online',
+        id: 'YF002',
+        name: '研发中心门禁',
+        location: '研发楼3层',
+        lastHeartbeat: '2024-03-20 08:30:00'
+      },
+      {
+        label: '实验室',
+        type: 'device',
+        status: 'online',
+        id: 'YF003',
+        name: '实验室门禁',
+        location: '研发楼4层',
+        lastHeartbeat: '2024-03-20 08:30:00'
+      }
+    ]
+  },
+  {
+    label: '生产楼门禁',
+    children: [
+      {
+        label: '生产楼正门',
+        type: 'device',
+        status: 'online',
+        id: 'SC001',
+        name: '生产楼正门门禁',
+        location: '生产楼1层',
+        lastHeartbeat: '2024-03-20 08:30:00'
+      },
+      {
+        label: '生产车间',
+        type: 'device',
+        status: 'online',
+        id: 'SC002',
+        name: '生产车间门禁',
+        location: '生产楼2层',
+        lastHeartbeat: '2024-03-20 08:30:00'
+      },
+      {
+        label: '物料仓库',
+        type: 'device',
+        status: 'online',
+        id: 'SC003',
+        name: '物料仓库门禁',
+        location: '生产楼1层',
+        lastHeartbeat: '2024-03-20 08:30:00'
       }
     ]
   }
@@ -262,43 +321,120 @@ const defaultProps = {
 // 权限列表
 const permissionList = ref([
   {
-    name: '张三',
-    type: '员工',
-    cardNo: '1001',
-    validTime: '2024-01-01 至 2024-12-31',
+    name: '张明',
+    type: '正式员工',
+    cardNo: 'EMP2025001',
+    validTime: '2025-01-01 至 2025-12-31',
+    accessTime: '工作日 08:30-18:00'
+  },
+  {
+    name: '李华',
+    type: '正式员工',
+    cardNo: 'EMP2025002',
+    validTime: '2025-01-01 至 2025-12-31',
+    accessTime: '工作日 08:30-18:00'
+  },
+  {
+    name: '王强',
+    type: '研发主管',
+    cardNo: 'EMP2024001',
+    validTime: '2025-01-01 至 2025-12-31',
     accessTime: '全天'
   },
   {
-    name: '李四',
-    type: '访客',
-    cardNo: '2001',
-    validTime: '2024-03-20 至 2024-03-21',
-    accessTime: '09:00-18:00'
+    name: '赵敏',
+    type: '生产主管',
+    cardNo: 'EMP2024002',
+    validTime: '2025-01-01 至 2025-12-31',
+    accessTime: '全天'
+  },
+  {
+    name: '陈工',
+    type: '供应商',
+    cardNo: 'SUP2025001',
+    validTime: '2025-05-20 至 2025-05-20',
+    accessTime: '09:00-17:00'
+  },
+  {
+    name: '刘工',
+    type: '供应商',
+    cardNo: 'SUP2025002',
+    validTime: '2025-05-20 至 2025-05-20',
+    accessTime: '09:00-17:00'
   }
 ])
 
 // 开门记录
 const accessRecords = ref([
   {
-    time: '2024-03-20 10:00:00',
-    name: '张三',
-    type: '刷卡',
-    device: 'A区大门门禁',
-    status: 'success'
-  },
-  {
-    time: '2024-03-20 10:05:00',
-    name: '李四',
+    time: '2024-03-20 08:25:00',
+    name: '张明',
     type: '人脸',
-    device: 'B区大门门禁',
+    device: '行政楼正门门禁',
     status: 'success'
   },
   {
-    time: '2024-03-20 10:10:00',
+    time: '2024-03-20 08:26:00',
+    name: '李华',
+    type: '人脸',
+    device: '行政楼正门门禁',
+    status: 'success'
+  },
+  {
+    time: '2024-03-20 08:27:00',
+    name: '王强',
+    type: '人脸',
+    device: '研发楼正门门禁',
+    status: 'success'
+  },
+  {
+    time: '2024-03-20 08:28:00',
+    name: '赵敏',
+    type: '人脸',
+    device: '生产楼正门门禁',
+    status: 'success'
+  },
+  {
+    time: '2024-03-20 09:00:00',
+    name: '陈工',
+    type: '访客码',
+    device: '行政楼正门门禁',
+    status: 'success'
+  },
+  {
+    time: '2024-03-20 09:05:00',
+    name: '刘工',
+    type: '访客码',
+    device: '行政楼正门门禁',
+    status: 'success'
+  },
+  {
+    time: '2024-03-20 09:10:00',
     name: '未知人员',
-    type: '刷卡',
-    device: 'A区侧门门禁',
+    type: '人脸',
+    device: '研发楼正门门禁',
     status: 'failed'
+  },
+  {
+    time: '2024-03-20 09:15:00',
+    name: '张明',
+    type: '人脸',
+    device: '行政楼办公区门禁',
+    status: 'success'
+  },
+  {
+    time: '2024-03-20 09:20:00',
+    name: '王强',
+    type: '人脸',
+    device: '研发中心门禁',
+    status: 'success'
+  },
+  {
+    time: '2024-03-20 09:25:00',
+    name: '赵敏',
+    type: '人脸',
+    device: '生产车间门禁',
+    status: 'success'
   }
 ])
 
@@ -373,21 +509,25 @@ const saveSettings = () => {
 <style scoped>
 .access-control {
   padding: 20px;
+  background-color: #f5f7fa;
 }
 
 .card-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  padding: 10px 0;
 }
 
 .header-actions {
   display: flex;
   gap: 10px;
+  align-items: center;
 }
 
 .device-list {
   height: calc(100vh - 100px);
+  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
 }
 
 .content-tabs {
@@ -401,6 +541,11 @@ const saveSettings = () => {
   justify-content: space-between;
   font-size: 14px;
   padding-right: 8px;
+  transition: all 0.3s;
+}
+
+.custom-tree-node:hover {
+  background-color: #f5f7fa;
 }
 
 .device-status {
@@ -411,5 +556,26 @@ const saveSettings = () => {
   margin-top: 20px;
   display: flex;
   justify-content: flex-end;
+  padding: 10px 0;
+}
+
+:deep(.el-card) {
+  margin-bottom: 20px;
+  border-radius: 8px;
+}
+
+:deep(.el-table) {
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+:deep(.el-tabs__nav) {
+  border-radius: 8px 8px 0 0;
+}
+
+:deep(.el-descriptions) {
+  padding: 20px;
+  background-color: #fff;
+  border-radius: 8px;
 }
 </style> 

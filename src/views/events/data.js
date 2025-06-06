@@ -1,6 +1,6 @@
 // 生成最近半个月内的随机时间
 const getRandomTime = (daysAgo) => {
-  const date = new Date()
+  const date = new Date('2025-05-20')
   date.setDate(date.getDate() - daysAgo)
   // 生成当天内的随机时间
   date.setHours(Math.floor(Math.random() * 24))

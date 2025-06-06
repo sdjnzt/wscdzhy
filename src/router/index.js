@@ -79,6 +79,6 @@ const routes = [
 ]
 
 export const router = createRouter({
-  history: createWebHistory('/smart-park/'),
+  history: createWebHistory('/wscdzhy/'),
   routes
 })

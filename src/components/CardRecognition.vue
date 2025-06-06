@@ -55,7 +55,7 @@
                   </div>
                 </div>
               </template>
-              <el-table :data="cardList" style="width: 100%">
+              <el-table :data="paginatedCards" style="width: 100%">
                 <el-table-column prop="cardNo" label="卡号" />
                 <el-table-column prop="type" label="卡片类型" />
                 <el-table-column prop="owner" label="持卡人" />
@@ -109,7 +109,7 @@
                     </div>
                   </template>
                   <div class="monitor-content">
-                    <el-table :data="realtimeRecords" style="width: 100%">
+                    <el-table :data="paginatedRecords" style="width: 100%">
                       <el-table-column prop="time" label="刷卡时间" width="180" />
                       <el-table-column prop="cardNo" label="卡号" />
                       <el-table-column prop="owner" label="持卡人" />
@@ -172,7 +172,7 @@
                   </div>
                 </div>
               </template>
-              <el-table :data="historyRecords" style="width: 100%">
+              <el-table :data="paginatedRecords" style="width: 100%">
                 <el-table-column prop="time" label="刷卡时间" width="180" />
                 <el-table-column prop="cardNo" label="卡号" />
                 <el-table-column prop="owner" label="持卡人" />
@@ -253,13 +253,14 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, computed, watch } from 'vue'
 import {
   VideoPlay,
   VideoPause,
   Search,
   Download
 } from '@element-plus/icons-vue'
+import { ElMessage, ElMessageBox } from 'element-plus'
 
 // 搜索关键词
 const searchKeyword = ref('')
@@ -306,7 +307,9 @@ const deviceGroups = ref([
         id: 'A001',
         name: 'A区大门读卡器',
         location: 'A区大门',
-        lastHeartbeat: '2024-03-20 10:00:00'
+        lastHeartbeat: '2024-03-20 10:00:00',
+        signal: '强',
+        battery: '90%'
       },
       {
         label: 'A区电梯读卡器',
@@ -315,7 +318,20 @@ const deviceGroups = ref([
         id: 'A002',
         name: 'A区电梯读卡器',
         location: 'A区电梯',
-        lastHeartbeat: '2024-03-20 10:00:00'
+        lastHeartbeat: '2024-03-20 10:00:00',
+        signal: '中',
+        battery: '85%'
+      },
+      {
+        label: 'A区会议室读卡器',
+        type: 'device',
+        status: 'online',
+        id: 'A003',
+        name: 'A区会议室读卡器',
+        location: 'A区会议室',
+        lastHeartbeat: '2024-03-20 10:00:00',
+        signal: '强',
+        battery: '95%'
       }
     ]
   },
@@ -329,7 +345,47 @@ const deviceGroups = ref([
         id: 'B001',
         name: 'B区大门读卡器',
         location: 'B区大门',
-        lastHeartbeat: '2024-03-20 09:30:00'
+        lastHeartbeat: '2024-03-20 09:30:00',
+        signal: '无',
+        battery: '0%'
+      },
+      {
+        label: 'B区走廊读卡器',
+        type: 'device',
+        status: 'online',
+        id: 'B002',
+        name: 'B区走廊读卡器',
+        location: 'B区走廊',
+        lastHeartbeat: '2024-03-20 10:00:00',
+        signal: '弱',
+        battery: '60%'
+      }
+    ]
+  },
+  {
+    label: 'C区读卡器',
+    children: [
+      {
+        label: 'C区大门读卡器',
+        type: 'device',
+        status: 'online',
+        id: 'C001',
+        name: 'C区大门读卡器',
+        location: 'C区大门',
+        lastHeartbeat: '2024-03-20 10:00:00',
+        signal: '强',
+        battery: '88%'
+      },
+      {
+        label: 'C区休息区读卡器',
+        type: 'device',
+        status: 'online',
+        id: 'C002',
+        name: 'C区休息区读卡器',
+        location: 'C区休息区',
+        lastHeartbeat: '2024-03-20 10:00:00',
+        signal: '中',
+        battery: '75%'
       }
     ]
   }
@@ -346,62 +402,190 @@ const cardList = ref([
   {
     cardNo: 'EMP001',
     type: 'employee',
-    owner: '张三',
+    owner: '王建国',
     department: '技术部',
     validFrom: '2024-01-01',
     validTo: '2024-12-31',
-    status: 'active'
+    status: 'active',
+    phone: '13905311234'
   },
   {
     cardNo: 'VIS001',
     type: 'visitor',
-    owner: '李四',
+    owner: '张丽华',
     department: '访客',
     validFrom: '2024-03-20',
     validTo: '2024-03-20',
-    status: 'expired'
+    status: 'expired',
+    phone: '13805322345'
+  },
+  {
+    cardNo: 'EMP002',
+    type: 'employee',
+    owner: '刘志强',
+    department: '行政部',
+    validFrom: '2024-01-01',
+    validTo: '2024-12-31',
+    status: 'active',
+    phone: '13705333456'
+  },
+  {
+    cardNo: 'TMP001',
+    type: 'temporary',
+    owner: '周晓明',
+    department: '外包人员',
+    validFrom: '2024-03-01',
+    validTo: '2024-06-30',
+    status: 'active',
+    phone: '13605344567'
+  },
+  {
+    cardNo: 'EMP003',
+    type: 'employee',
+    owner: '吴秀英',
+    department: '人事部',
+    validFrom: '2024-01-01',
+    validTo: '2024-12-31',
+    status: 'lost',
+    phone: '13505355678'
+  },
+  {
+    cardNo: 'EMP004',
+    type: 'employee',
+    owner: '郑志明',
+    department: '财务部',
+    validFrom: '2024-01-01',
+    validTo: '2024-12-31',
+    status: 'inactive',
+    phone: '13405366789'
+  },
+  {
+    cardNo: 'VIS002',
+    type: 'visitor',
+    owner: '林美玲',
+    department: '访客',
+    validFrom: '2024-03-21',
+    validTo: '2024-03-21',
+    status: 'active',
+    phone: '13305377890'
+  },
+  {
+    cardNo: 'TMP002',
+    type: 'temporary',
+    owner: '黄建国',
+    department: '外包人员',
+    validFrom: '2024-03-01',
+    validTo: '2024-09-30',
+    status: 'active',
+    phone: '13205388901'
   }
 ])
 
 // 实时记录
 const realtimeRecords = ref([
   {
-    time: '2024-03-20 10:00:00',
+    time: '2025-05-20 10:00:00',
     cardNo: 'EMP001',
-    owner: '张三',
+    owner: '王建国',
     device: 'A区大门读卡器',
     location: 'A区大门',
-    status: 'success'
+    status: 'success',
+    department: '技术部'
   },
   {
-    time: '2024-03-20 10:01:00',
+    time: '2025-05-20 10:01:00',
     cardNo: 'EMP002',
-    owner: '王五',
+    owner: '刘志强',
     device: 'A区电梯读卡器',
     location: 'A区电梯',
-    status: 'success'
+    status: 'success',
+    department: '行政部'
+  },
+  {
+    time: '2025-05-20 10:02:00',
+    cardNo: 'VIS001',
+    owner: '张丽华',
+    device: 'B区大门读卡器',
+    location: 'B区大门',
+    status: 'failed',
+    department: '访客',
+    failReason: '卡片已过期'
+  },
+  {
+    time: '2025-05-20 10:03:00',
+    cardNo: 'TMP001',
+    owner: '周晓明',
+    device: 'C区大门读卡器',
+    location: 'C区大门',
+    status: 'success',
+    department: '外包人员'
   }
 ])
 
 // 历史记录
 const historyRecords = ref([
   {
-    time: '2024-03-20 09:00:00',
+    time: '2025-05-20 09:00:00',
     cardNo: 'EMP001',
-    owner: '张三',
+    owner: '王建国',
     device: 'A区大门读卡器',
     location: 'A区大门',
-    status: 'success'
+    status: 'success',
+    department: '技术部'
   },
   {
-    time: '2024-03-20 09:30:00',
+    time: '2025-05-20 09:30:00',
     cardNo: 'VIS001',
-    owner: '李四',
+    owner: '张丽华',
     device: 'B区大门读卡器',
     location: 'B区大门',
-    status: 'failed'
+    status: 'failed',
+    department: '访客',
+    failReason: '卡片已过期'
+  },
+  {
+    time: '2025-05-20 09:45:00',
+    cardNo: 'EMP002',
+    owner: '刘志强',
+    device: 'A区电梯读卡器',
+    location: 'A区电梯',
+    status: 'success',
+    department: '行政部'
+  },
+  {
+    time: '2025-05-20 10:00:00',
+    cardNo: 'TMP001',
+    owner: '周晓明',
+    device: 'C区大门读卡器',
+    location: 'C区大门',
+    status: 'success',
+    department: '外包人员'
+  },
+  {
+    time: '2025-05-20 10:15:00',
+    cardNo: 'EMP003',
+    owner: '吴秀英',
+    device: 'A区会议室读卡器',
+    location: 'A区会议室',
+    status: 'failed',
+    department: '人事部',
+    failReason: '卡片已挂失'
   }
 ])
+
+// 计算当前页的数据
+const paginatedCards = computed(() => {
+  const start = (currentPage.value - 1) * pageSize.value
+  const end = start + pageSize.value
+  return cardList.value.slice(start, end)
+})
+
+// 计算当前页的记录数据
+const paginatedRecords = computed(() => {
+  const start = (currentPage.value - 1) * pageSize.value
+  const end = start + pageSize.value
+  return activeTab.value === 'monitor' ? realtimeRecords.value.slice(start, end) : historyRecords.value.slice(start, end)
+})
 
 // 获取状态类型
 const getStatusType = (status) => {
@@ -462,12 +646,58 @@ const handleEditCard = (card) => {
 
 // 删除卡片
 const handleDeleteCard = (card) => {
-  console.log('删除卡片:', card)
+  ElMessageBox.confirm(
+    `确定要删除卡号为 ${card.cardNo} 的卡片吗？`,
+    '警告',
+    {
+      confirmButtonText: '确定',
+      cancelButtonText: '取消',
+      type: 'warning',
+    }
+  ).then(() => {
+    const index = cardList.value.findIndex(c => c.cardNo === card.cardNo)
+    if (index > -1) {
+      cardList.value.splice(index, 1)
+      ElMessage.success('删除成功')
+    }
+  }).catch(() => {})
 }
 
 // 保存卡片
 const handleSaveCard = () => {
-  console.log('保存卡片:', cardForm.value)
+  // 表单验证
+  if (!cardForm.value.cardNo || !cardForm.value.type || !cardForm.value.owner || !cardForm.value.department || !cardForm.value.validPeriod) {
+    ElMessage.error('请填写完整信息')
+    return
+  }
+
+  // 卡号格式验证
+  if (!/^[A-Z]{3}\d{3}$/.test(cardForm.value.cardNo)) {
+    ElMessage.error('卡号格式不正确，应为3位大写字母+3位数字')
+    return
+  }
+
+  if (dialogType.value === 'add') {
+    // 添加新卡片
+    cardList.value.unshift({
+      ...cardForm.value,
+      validFrom: cardForm.value.validPeriod[0],
+      validTo: cardForm.value.validPeriod[1],
+      status: 'active'
+    })
+    ElMessage.success('添加成功')
+  } else {
+    // 更新卡片
+    const index = cardList.value.findIndex(c => c.cardNo === cardForm.value.cardNo)
+    if (index > -1) {
+      cardList.value[index] = {
+        ...cardForm.value,
+        validFrom: cardForm.value.validPeriod[0],
+        validTo: cardForm.value.validPeriod[1]
+      }
+      ElMessage.success('更新成功')
+    }
+  }
   showCardDialog.value = false
 }
 
@@ -495,7 +725,29 @@ const handleImport = () => {
 
 // 导出数据
 const handleExport = () => {
-  console.log('导出数据')
+  // 准备导出数据
+  const exportData = activeTab.value === 'cards' ? cardList.value.map(card => ({
+    '卡号': card.cardNo,
+    '卡片类型': card.type === 'employee' ? '员工卡' : card.type === 'visitor' ? '访客卡' : '临时卡',
+    '持卡人': card.owner,
+    '所属部门': card.department,
+    '生效时间': card.validFrom,
+    '失效时间': card.validTo,
+    '状态': getStatusText(card.status)
+  })) : historyRecords.value.map(record => ({
+    '刷卡时间': record.time,
+    '卡号': record.cardNo,
+    '持卡人': record.owner,
+    '设备名称': record.device,
+    '位置': record.location,
+    '状态': record.status === 'success' ? '成功' : '失败',
+    '失败原因': record.failReason || ''
+  }))
+
+  // 模拟导出过程
+  setTimeout(() => {
+    ElMessage.success('导出成功')
+  }, 1000)
 }
 
 // 处理日期变化
@@ -505,13 +757,28 @@ const handleDateChange = (val) => {
 
 // 处理分页大小变化
 const handleSizeChange = (val) => {
-  console.log('每页条数:', val)
+  pageSize.value = val
+  currentPage.value = 1
+  total.value = activeTab.value === 'cards' ? cardList.value.length : 
+                activeTab.value === 'monitor' ? realtimeRecords.value.length : 
+                historyRecords.value.length
 }
 
 // 处理页码变化
 const handleCurrentChange = (val) => {
-  console.log('当前页:', val)
+  currentPage.value = val
 }
+
+// 监听标签页变化
+watch(activeTab, (newTab) => {
+  currentPage.value = 1
+  total.value = newTab === 'cards' ? cardList.value.length : 
+                newTab === 'monitor' ? realtimeRecords.value.length : 
+                historyRecords.value.length
+})
+
+// 初始化总数
+total.value = cardList.value.length
 </script>
 
 <style scoped>
