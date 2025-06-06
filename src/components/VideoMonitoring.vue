@@ -1,327 +1,719 @@
 <template>
   <div class="video-monitoring">
     <el-row :gutter="20">
-      <!-- 左侧视频列表 -->
+      <!-- 左侧设备树 -->
       <el-col :span="6">
-        <el-card class="video-list">
+        <el-card class="device-tree">
           <template #header>
-            <div class="card-header">
+            <div class="tree-header">
               <span>监控点位</span>
               <el-input
-                v-model="searchKeyword"
-                placeholder="搜索摄像头"
+                v-model="searchKey"
+                placeholder="搜索设备"
                 prefix-icon="Search"
-                clearable
-                @clear="handleSearch"
-                @input="handleSearch"
+                size="small"
               />
             </div>
           </template>
-          <el-scrollbar height="calc(100vh - 200px)">
-            <el-tree
-              :data="cameraGroups"
-              :props="defaultProps"
-              @node-click="handleNodeClick"
-              highlight-current
-            >
-              <template #default="{ node, data }">
-                <div class="custom-tree-node">
-                  <span>{{ node.label }}</span>
-                  <span v-if="data.type === 'camera'" class="camera-status">
-                    <el-tag size="small" :type="data.status === 'online' ? 'success' : 'danger'">
-                      {{ data.status === 'online' ? '在线' : '离线' }}
-                    </el-tag>
-                  </span>
-                </div>
-              </template>
-            </el-tree>
-          </el-scrollbar>
+          
+          <el-tree
+            ref="treeRef"
+            :data="treeData"
+            :props="defaultProps"
+            :filter-node-method="filterNode"
+            node-key="id"
+            highlight-current
+            @node-click="handleNodeClick"
+          >
+            <template #default="{ node, data }">
+              <div class="custom-tree-node">
+                <el-icon><component :is="data.icon" /></el-icon>
+                <span>{{ node.label }}</span>
+                <el-tag 
+                  size="small" 
+                  :type="data.status === '在线' ? 'success' : 'danger'"
+                  v-if="data.type === 'camera'"
+                >
+                  {{ data.status }}
+                </el-tag>
+              </div>
+            </template>
+          </el-tree>
         </el-card>
       </el-col>
 
-      <!-- 右侧视频显示区域 -->
+      <!-- 右侧视频区域 -->
       <el-col :span="18">
-        <el-card class="video-display">
+        <el-card class="video-wall">
           <template #header>
-            <div class="card-header">
-              <span>{{ currentCamera ? currentCamera.name : '请选择摄像头' }}</span>
-              <div class="header-actions">
+            <div class="wall-header">
+              <div class="header-left">
+                <span>视频预览</span>
+                <el-radio-group v-model="layout" size="small">
+                  <el-radio-button label="1">1×1</el-radio-button>
+                  <el-radio-button label="4">2×2</el-radio-button>
+                  <el-radio-button label="9">3×3</el-radio-button>
+                </el-radio-group>
+              </div>
+              <div class="header-right">
                 <el-button-group>
-                  <el-button type="primary" :icon="VideoPlay" @click="handlePlay">播放</el-button>
-                  <el-button type="primary" :icon="VideoPause" @click="handlePause">暂停</el-button>
-                  <el-button type="primary" :icon="VideoCamera" @click="handleSnapshot">截图</el-button>
-                </el-button-group>
-                <el-button-group class="ml-2">
-                  <el-button type="success" :icon="VideoPlay" @click="showPlayback = true">回放</el-button>
-                  <el-button type="warning" :icon="Setting" @click="showSettings = true">设置</el-button>
+                  <el-button 
+                    type="primary" 
+                    :icon="VideoPlay"
+                    @click="startAllVideo"
+                  >
+                    全部播放
+                  </el-button>
+                  <el-button 
+                    type="danger" 
+                    :icon="VideoPause"
+                    @click="stopAllVideo"
+                  >
+                    全部停止
+                  </el-button>
                 </el-button-group>
               </div>
             </div>
           </template>
-          
-          <!-- 视频显示区域 -->
-          <div class="video-container">
-            <div v-if="currentCamera" class="video-player">
-              <div class="video-placeholder">
-                <el-icon :size="48"><VideoCamera /></el-icon>
-                <p>摄像头 {{ currentCamera.name }} 实时画面</p>
+
+          <div class="video-container" :class="'layout-' + layout">
+            <div 
+              v-for="n in +layout" 
+              :key="n" 
+              class="video-item"
+              @click="handleVideoClick(n - 1)"
+              :class="{ active: currentVideoIndex === n - 1 }"
+            >
+              <div class="video-content">
+                <img 
+                  :src="defaultImages[n-1]"
+                  class="video-image"
+                  alt="监控画面"
+                />
+                <!-- 左上角摄像头信息 -->
+                <div class="camera-status">
+                  <div class="status-dot"></div>
+                  <span>实时监控</span>
+                </div>
+                <!-- 右上角时间戳 -->
+                <div class="timestamp">
+                  {{ currentTime }}
+                </div>
+                <!-- 左下角位置信息 -->
+                <div class="location-info">
+                  <span>监控画面 {{n}}</span>
+                  <span>默认位置 {{n}}</span>
+                </div>
+                <!-- 右下角设备信息 -->
+                <div class="device-info">
+                  <span>设备编号: Camera_{{n.toString().padStart(2, '0')}}</span>
+                  <span>分辨率: 1920×1080</span>
+                </div>
               </div>
             </div>
-            <div v-else class="video-placeholder">
-              <el-icon :size="48"><VideoCamera /></el-icon>
-              <p>请选择要查看的摄像头</p>
-            </div>
           </div>
+        </el-card>
 
-          <!-- 视频控制面板 -->
-          <div class="video-controls" v-if="currentCamera">
-            <el-slider v-model="volume" :max="100" :min="0" />
-            <div class="control-buttons">
+        <!-- 云台控制 -->
+        <el-card class="ptz-control" v-if="currentVideoIndex !== null">
+          <template #header>
+            <div class="control-header">
+              <span>云台控制</span>
+              <span class="current-camera">
+                {{ videos[currentVideoIndex]?.name || '未选择摄像头' }}
+              </span>
+            </div>
+          </template>
+
+          <div class="control-panel">
+            <div class="direction-control">
+              <el-button-group class="vertical-group">
+                <el-button @click="ptzControl('up')">
+                  <el-icon><CaretTop /></el-icon>
+                </el-button>
+                <el-button @click="ptzControl('down')">
+                  <el-icon><CaretBottom /></el-icon>
+                </el-button>
+              </el-button-group>
+              <el-button-group class="horizontal-group">
+                <el-button @click="ptzControl('left')">
+                  <el-icon><CaretLeft /></el-icon>
+                </el-button>
+                <el-button @click="ptzControl('right')">
+                  <el-icon><CaretRight /></el-icon>
+                </el-button>
+              </el-button-group>
+            </div>
+
+            <div class="zoom-control">
               <el-button-group>
-                <el-button :icon="Mute" @click="handleMute">静音</el-button>
-                <el-button :icon="FullScreen" @click="handleFullScreen">全屏</el-button>
+                <el-button @click="ptzControl('zoomIn')">
+                  <el-icon><ZoomIn /></el-icon>
+                </el-button>
+                <el-button @click="ptzControl('zoomOut')">
+                  <el-icon><ZoomOut /></el-icon>
+                </el-button>
+              </el-button-group>
+            </div>
+
+            <div class="preset-control">
+              <el-select v-model="currentPreset" placeholder="预置点">
+                <el-option
+                  v-for="item in presetPoints"
+                  :key="item.value"
+                  :label="item.label"
+                  :value="item.value"
+                />
+              </el-select>
+              <el-button-group>
+                <el-button 
+                  type="primary" 
+                  @click="callPreset"
+                  :disabled="!currentPreset"
+                >
+                  调用
+                </el-button>
+                <el-button 
+                  type="success" 
+                  @click="savePreset"
+                  :disabled="!currentPreset"
+                >
+                  设置
+                </el-button>
               </el-button-group>
             </div>
           </div>
         </el-card>
       </el-col>
     </el-row>
-
-    <!-- 录像回放对话框 -->
-    <el-dialog
-      v-model="showPlayback"
-      title="录像回放"
-      width="80%"
-      destroy-on-close
-    >
-      <div class="playback-container">
-        <el-row :gutter="20">
-          <el-col :span="6">
-            <el-calendar v-model="playbackDate" />
-          </el-col>
-          <el-col :span="18">
-            <div class="playback-timeline">
-              <el-timeline>
-                <el-timeline-item
-                  v-for="(record, index) in playbackRecords"
-                  :key="index"
-                  :timestamp="record.time"
-                  :type="record.type"
-                >
-                  {{ record.content }}
-                </el-timeline-item>
-              </el-timeline>
-            </div>
-          </el-col>
-        </el-row>
-      </div>
-    </el-dialog>
-
-    <!-- 摄像头设置对话框 -->
-    <el-dialog
-      v-model="showSettings"
-      title="摄像头设置"
-      width="50%"
-      destroy-on-close
-    >
-      <el-form :model="cameraSettings" label-width="100px">
-        <el-form-item label="摄像头名称">
-          <el-input v-model="cameraSettings.name" />
-        </el-form-item>
-        <el-form-item label="分辨率">
-          <el-select v-model="cameraSettings.resolution">
-            <el-option label="1080P" value="1080p" />
-            <el-option label="720P" value="720p" />
-            <el-option label="480P" value="480p" />
-          </el-select>
-        </el-form-item>
-        <el-form-item label="帧率">
-          <el-select v-model="cameraSettings.fps">
-            <el-option label="30fps" value="30" />
-            <el-option label="25fps" value="25" />
-            <el-option label="20fps" value="20" />
-          </el-select>
-        </el-form-item>
-        <el-form-item label="码率">
-          <el-select v-model="cameraSettings.bitrate">
-            <el-option label="4Mbps" value="4" />
-            <el-option label="2Mbps" value="2" />
-            <el-option label="1Mbps" value="1" />
-          </el-select>
-        </el-form-item>
-      </el-form>
-      <template #footer>
-        <span class="dialog-footer">
-          <el-button @click="showSettings = false">取消</el-button>
-          <el-button type="primary" @click="saveSettings">保存</el-button>
-        </span>
-      </template>
-    </el-dialog>
   </div>
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
-import {
-  VideoPlay,
-  VideoPause,
+import { ref, watch, onMounted } from 'vue'
+import { 
+  VideoPlay, 
+  VideoPause, 
   VideoCamera,
-  Setting,
-  Mute,
-  FullScreen,
-  Search
+  Camera,
+  CaretTop,
+  CaretBottom,
+  CaretLeft,
+  CaretRight,
+  ZoomIn,
+  ZoomOut,
+  FolderOpened,
+  Monitor
 } from '@element-plus/icons-vue'
+import { ElMessage } from 'element-plus'
 
-// 搜索关键词
-const searchKeyword = ref('')
+// 搜索关键字
+const searchKey = ref('')
+const treeRef = ref(null)
 
-// 摄像头分组数据
-const cameraGroups = ref([
+// 监视搜索关键字变化
+watch(searchKey, (val) => {
+  treeRef.value?.filter(val)
+})
+
+// 设备树数据
+const treeData = [
   {
-    label: 'A区监控',
+    id: 1,
+    label: 'A栋',
+    icon: 'FolderOpened',
     children: [
       {
-        label: 'A区大门',
+        id: 11,
+        label: 'A1-高空抛物',
         type: 'camera',
-        status: 'online',
-        id: 'A001',
-        name: 'A区大门摄像头'
+        icon: 'Monitor',
+        status: '在线',
+        location: 'A栋1单元西侧',
+        resolution: '1920×1080',
+        frameRate: '25fps',
+        streamType: 'H.264'
       },
       {
-        label: 'A区停车场',
+        id: 12,
+        label: 'A2-人流检测',
         type: 'camera',
-        status: 'online',
-        id: 'A002',
-        name: 'A区停车场摄像头'
+        icon: 'Monitor',
+        status: '在线',
+        location: 'A栋1单元大堂',
+        resolution: '1920×1080',
+        frameRate: '25fps',
+        streamType: 'H.264'
+      },
+      {
+        id: 13,
+        label: 'A3-车库入口',
+        type: 'camera',
+        icon: 'Monitor',
+        status: '离线',
+        location: 'A栋地下车库入口',
+        resolution: '1920×1080',
+        frameRate: '25fps',
+        streamType: 'H.264',
+        lastOnline: '2024-03-20 14:30:15'
       }
     ]
   },
   {
-    label: 'B区监控',
+    id: 2,
+    label: 'B栋',
+    icon: 'FolderOpened',
     children: [
       {
-        label: 'B区大门',
+        id: 21,
+        label: 'B1-高空抛物',
         type: 'camera',
-        status: 'offline',
-        id: 'B001',
-        name: 'B区大门摄像头'
+        icon: 'Monitor',
+        status: '在线',
+        location: 'B栋2单元东侧',
+        resolution: '1920×1080',
+        frameRate: '25fps',
+        streamType: 'H.264'
       },
       {
-        label: 'B区走廊',
+        id: 22,
+        label: 'B2-人流检测',
         type: 'camera',
-        status: 'online',
-        id: 'B002',
-        name: 'B区走廊摄像头'
+        icon: 'Monitor',
+        status: '在线',
+        location: 'B栋大堂',
+        resolution: '1920×1080',
+        frameRate: '25fps',
+        streamType: 'H.264'
       }
     ]
   },
   {
-    label: 'C区监控',
+    id: 3,
+    label: 'C栋',
+    icon: 'FolderOpened',
     children: [
       {
-        label: 'C区大厅',
+        id: 31,
+        label: 'C1-高空抛物',
         type: 'camera',
-        status: 'online',
-        id: 'C001',
-        name: 'C区大厅摄像头'
+        icon: 'Monitor',
+        status: '在线',
+        location: 'C栋3单元北侧',
+        resolution: '1920×1080',
+        frameRate: '25fps',
+        streamType: 'H.264'
       },
       {
-        label: 'C区电梯',
+        id: 32,
+        label: 'C2-广场监控',
         type: 'camera',
-        status: 'online',
-        id: 'C002',
-        name: 'C区电梯摄像头'
+        icon: 'Monitor',
+        status: '在线',
+        location: 'C栋楼下广场',
+        resolution: '1920×1080',
+        frameRate: '25fps',
+        streamType: 'H.264'
+      }
+    ]
+  },
+  {
+    id: 4,
+    label: '公共区域',
+    icon: 'FolderOpened',
+    children: [
+      {
+        id: 41,
+        label: 'D1-小区大门',
+        type: 'camera',
+        icon: 'Monitor',
+        status: '在线',
+        location: '小区主入口',
+        resolution: '1920×1080',
+        frameRate: '25fps',
+        streamType: 'H.264'
+      },
+      {
+        id: 42,
+        label: 'D2-停车场',
+        type: 'camera',
+        icon: 'Monitor',
+        status: '在线',
+        location: '地面停车场',
+        resolution: '1920×1080',
+        frameRate: '25fps',
+        streamType: 'H.264'
+      },
+      {
+        id: 43,
+        label: 'D3-儿童乐园',
+        type: 'camera',
+        icon: 'Monitor',
+        status: '在线',
+        location: '中心花园',
+        resolution: '1920×1080',
+        frameRate: '25fps',
+        streamType: 'H.264'
+      }
+    ]
+  },
+  {
+    id: 5,
+    label: 'E栋',
+    icon: 'FolderOpened',
+    children: [
+      {
+        id: 51,
+        label: 'E1-高空抛物',
+        type: 'camera',
+        icon: 'Monitor',
+        status: '在线',
+        location: 'E栋1单元东侧',
+        resolution: '1920×1080',
+        frameRate: '25fps',
+        streamType: 'H.264'
+      },
+      {
+        id: 52,
+        label: 'E2-人流检测',
+        type: 'camera',
+        icon: 'Monitor',
+        status: '在线',
+        location: 'E栋大堂',
+        resolution: '1920×1080',
+        frameRate: '25fps',
+        streamType: 'H.264'
+      },
+      {
+        id: 53,
+        label: 'E3-电梯监控',
+        type: 'camera',
+        icon: 'Monitor',
+        status: '离线',
+        location: 'E栋1单元电梯',
+        resolution: '1920×1080',
+        frameRate: '25fps',
+        streamType: 'H.264',
+        lastOnline: '2024-03-20 16:30:15'
+      }
+    ]
+  },
+  {
+    id: 6,
+    label: 'F栋',
+    icon: 'FolderOpened',
+    children: [
+      {
+        id: 61,
+        label: 'F1-高空抛物',
+        type: 'camera',
+        icon: 'Monitor',
+        status: '在线',
+        location: 'F栋2单元西侧',
+        resolution: '1920×1080',
+        frameRate: '25fps',
+        streamType: 'H.264'
+      },
+      {
+        id: 62,
+        label: 'F2-人流检测',
+        type: 'camera',
+        icon: 'Monitor',
+        status: '在线',
+        location: 'F栋大堂',
+        resolution: '1920×1080',
+        frameRate: '25fps',
+        streamType: 'H.264'
+      },
+      {
+        id: 63,
+        label: 'F3-楼道监控',
+        type: 'camera',
+        icon: 'Monitor',
+        status: '在线',
+        location: 'F栋1单元一层',
+        resolution: '1920×1080',
+        frameRate: '25fps',
+        streamType: 'H.264'
+      }
+    ]
+  },
+  {
+    id: 7,
+    label: 'G栋',
+    icon: 'FolderOpened',
+    children: [
+      {
+        id: 71,
+        label: 'G1-高空抛物',
+        type: 'camera',
+        icon: 'Monitor',
+        status: '在线',
+        location: 'G栋3单元北侧',
+        resolution: '1920×1080',
+        frameRate: '25fps',
+        streamType: 'H.264'
+      },
+      {
+        id: 72,
+        label: 'G2-人流检测',
+        type: 'camera',
+        icon: 'Monitor',
+        status: '离线',
+        location: 'G栋大堂',
+        resolution: '1920×1080',
+        frameRate: '25fps',
+        streamType: 'H.264',
+        lastOnline: '2024-03-20 17:45:30'
+      }
+    ]
+  },
+  {
+    id: 8,
+    label: 'H栋',
+    icon: 'FolderOpened',
+    children: [
+      {
+        id: 81,
+        label: 'H1-高空抛物',
+        type: 'camera',
+        icon: 'Monitor',
+        status: '在线',
+        location: 'H栋1单元东侧',
+        resolution: '1920×1080',
+        frameRate: '25fps',
+        streamType: 'H.264'
+      },
+      {
+        id: 82,
+        label: 'H2-电梯监控',
+        type: 'camera',
+        icon: 'Monitor',
+        status: '在线',
+        location: 'H栋1单元电梯',
+        resolution: '1920×1080',
+        frameRate: '25fps',
+        streamType: 'H.264'
+      }
+    ]
+  },
+  {
+    id: 9,
+    label: 'I栋',
+    icon: 'FolderOpened',
+    children: [
+      {
+        id: 91,
+        label: 'I1-高空抛物',
+        type: 'camera',
+        icon: 'Monitor',
+        status: '在线',
+        location: 'I栋2单元西侧',
+        resolution: '1920×1080',
+        frameRate: '25fps',
+        streamType: 'H.264'
+      },
+      {
+        id: 92,
+        label: 'I2-人流检测',
+        type: 'camera',
+        icon: 'Monitor',
+        status: '在线',
+        location: 'I栋大堂',
+        resolution: '1920×1080',
+        frameRate: '25fps',
+        streamType: 'H.264'
       }
     ]
   }
-])
+]
 
-// 树形配置
 const defaultProps = {
   children: 'children',
   label: 'label'
 }
 
-// 当前选中的摄像头
-const currentCamera = ref(null)
+// 过滤节点方法
+const filterNode = (value, data) => {
+  if (!value) return true
+  return data.label.includes(value)
+}
 
-// 音量控制
-const volume = ref(50)
+// 视频墙布局
+const layout = ref('4')
+const currentVideoIndex = ref(null)
+const videos = ref([])
+const currentPreset = ref('')
 
-// 对话框控制
-const showPlayback = ref(false)
-const showSettings = ref(false)
+// 预置点列表
+const presetPoints = [
+  { value: '1', label: '大门入口' },
+  { value: '2', label: '垃圾投放处' },
+  { value: '3', label: '消防通道' },
+  { value: '4', label: '电动车充电处' },
+  { value: '5', label: '快递柜' },
+  { value: '6', label: '车库入口' }
+]
 
-// 回放日期
-const playbackDate = ref(new Date())
+// 修改 defaultImages 数组
+const defaultImages = [
+  '/wscdzhy/images/camera/222.jpg',
+  '/wscdzhy/images/camera/333.jpg',
+  '/wscdzhy/images/camera/444.png',
+  '/wscdzhy/images/camera/555.png',
+  '/wscdzhy/images/camera/555.png',
+  '/wscdzhy/images/camera/888.png',
+  '/wscdzhy/images/camera/777.png',
+  '/wscdzhy/images/camera/888.png',
+  '/wscdzhy/images/camera/888.png'
 
-// 回放记录
-const playbackRecords = ref([
-  {
-    time: '2024-03-20 10:00:00',
-    content: '正常监控画面',
-    type: 'success'
-  },
-  {
-    time: '2024-03-20 10:15:00',
-    content: '检测到人员移动',
-    type: 'warning'
-  },
-  {
-    time: '2024-03-20 10:30:00',
-    content: '检测到异常行为',
-    type: 'danger'
-  }
-])
+]
 
-// 摄像头设置
-const cameraSettings = ref({
-  name: '',
-  resolution: '1080p',
-  fps: '30',
-  bitrate: '4'
-})
-
-// 处理节点点击
+// 处理设备树节点点击
 const handleNodeClick = (data) => {
   if (data.type === 'camera') {
-    currentCamera.value = data
-    cameraSettings.value.name = data.name
+    if (data.status === '离线') {
+      ElMessage.warning(`${data.label}当前离线，最后在线时间：${data.lastOnline}`)
+      return
+    }
+    
+    if (currentVideoIndex.value !== null && !videos.value[currentVideoIndex.value]) {
+      videos.value[currentVideoIndex.value] = {
+        id: data.id,
+        name: data.label,
+        location: data.location,
+        resolution: data.resolution,
+        frameRate: data.frameRate,
+        streamType: data.streamType,
+        status: 'playing',
+        startTime: new Date().toLocaleString(),
+        recordStatus: true,
+        ptzEnabled: true
+      }
+      ElMessage.success(`已添加到窗口 ${currentVideoIndex.value + 1}`)
+    }
   }
 }
 
-// 处理搜索
-const handleSearch = () => {
-  // 实现搜索逻辑
-  console.log('搜索关键词:', searchKeyword.value)
+// 处理视频窗口点击
+const handleVideoClick = (index) => {
+  currentVideoIndex.value = index
 }
 
-// 视频控制方法
-const handlePlay = () => {
-  console.log('播放视频')
+// 播放视频
+const playVideo = (index) => {
+  if (videos.value[index]) {
+    videos.value[index].status = 'playing'
+    ElMessage.success('开始播放')
+  }
 }
 
-const handlePause = () => {
-  console.log('暂停视频')
+// 暂停视频
+const pauseVideo = (index) => {
+  if (videos.value[index]) {
+    videos.value[index].status = 'paused'
+    ElMessage.success('已暂停')
+  }
 }
 
-const handleSnapshot = () => {
-  console.log('截图')
+// 截图
+const snapshot = (index) => {
+  if (videos.value[index]) {
+    ElMessage.success('截图已保存')
+  }
 }
 
-const handleMute = () => {
-  console.log('静音')
+// 开始所有视频
+const startAllVideo = () => {
+  videos.value.forEach((video, index) => {
+    if (video) {
+      playVideo(index)
+    }
+  })
 }
 
-const handleFullScreen = () => {
-  console.log('全屏')
+// 停止所有视频
+const stopAllVideo = () => {
+  videos.value.forEach((video, index) => {
+    if (video) {
+      pauseVideo(index)
+    }
+  })
 }
 
-// 保存设置
-const saveSettings = () => {
-  console.log('保存设置:', cameraSettings.value)
-  showSettings.value = false
+// 云台控制
+const ptzControl = (direction) => {
+  if (currentVideoIndex.value !== null && videos.value[currentVideoIndex.value]) {
+    const camera = videos.value[currentVideoIndex.value]
+    ElMessage.success(`${camera.name} - 云台控制：${direction}`)
+    // 模拟云台控制延迟
+    setTimeout(() => {
+      ElMessage.success(`${camera.name} - ${direction}操作完成`)
+    }, 500)
+  }
 }
+
+// 调用预置点
+const callPreset = () => {
+  if (currentVideoIndex.value !== null && videos.value[currentVideoIndex.value]) {
+    const camera = videos.value[currentVideoIndex.value]
+    const preset = presetPoints.find(p => p.value === currentPreset.value)
+    ElMessage.success(`${camera.name} - 调用预置点：${preset.label}`)
+  }
+}
+
+// 保存预置点
+const savePreset = () => {
+  if (currentVideoIndex.value !== null && videos.value[currentVideoIndex.value]) {
+    const camera = videos.value[currentVideoIndex.value]
+    const preset = presetPoints.find(p => p.value === currentPreset.value)
+    ElMessage.success(`${camera.name} - 设置预置点：${preset.label}`)
+  }
+}
+
+const handleImageError = (e) => {
+  console.error('图片加载失败:', e.target.src)
+  // 打印完整的图片URL
+  console.log('完整URL:', new URL(e.target.src, window.location.href).href)
+}
+
+const handleImageLoad = (e) => {
+  console.log('图片加载成功:', e.target.src)
+}
+
+// 测试图片是否存在
+const testImageUrls = () => {
+  defaultImages.forEach(url => {
+    const img = new Image()
+    img.onload = () => console.log('图片存在:', url)
+    img.onerror = () => console.error('图片不存在:', url)
+    img.src = url
+  })
+}
+
+// 添加当前时间显示
+const currentTime = ref('')
+
+// 更新时间
+const updateTime = () => {
+  const now = new Date()
+  currentTime.value = now.toLocaleString('zh-CN', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: false
+  })
+}
+
+// 组件挂载时测试图片
+onMounted(() => {
+  testImageUrls()
+  updateTime()
+  setInterval(updateTime, 1000)
+})
 </script>
 
 <style scoped>
@@ -329,81 +721,247 @@ const saveSettings = () => {
   padding: 20px;
 }
 
-.card-header {
+.device-tree {
+  height: calc(100vh - 140px);
+  overflow-y: auto;
+}
+
+.tree-header {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.custom-tree-node {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+}
+
+.custom-tree-node .el-tag {
+  margin-left: auto;
+}
+
+.video-wall {
+  margin-bottom: 20px;
+}
+
+.wall-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
 
-.header-actions {
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.video-container {
+  display: grid;
+  gap: 10px;
+  aspect-ratio: 16/9;
+  background: #000;
+  padding: 10px;
+}
+
+.layout-1 {
+  grid-template-columns: 1fr;
+}
+
+.layout-4 {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.layout-9 {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.video-item {
+  position: relative;
+  background: #1a1a1a;
+  border: 2px solid transparent;
+  transition: all 0.3s;
+}
+
+.video-item.active {
+  border-color: var(--el-color-primary);
+}
+
+.video-placeholder {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #666;
+  gap: 10px;
+}
+
+.video-content {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  background: #000;
+}
+
+.video-image {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  background: #000;
+}
+
+.video-info {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  display: flex;
+  flex-direction: column;
+  color: #fff;
+  text-shadow: 0 0 2px rgba(0,0,0,0.5);
+  z-index: 1;
+}
+
+.video-controls {
+  position: absolute;
+  bottom: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: none;
+}
+
+.video-item:hover .video-controls {
+  display: block;
+}
+
+.ptz-control {
+  height: 200px;
+}
+
+.control-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.current-camera {
+  color: var(--el-color-primary);
+  font-size: 14px;
+}
+
+.control-panel {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  padding: 20px;
+}
+
+.direction-control {
   display: flex;
   gap: 10px;
 }
 
-.ml-2 {
-  margin-left: 10px;
-}
-
-.video-list {
-  height: calc(100vh - 100px);
-}
-
-.video-display {
-  height: calc(100vh - 100px);
-}
-
-.video-container {
-  height: calc(100vh - 250px);
-  background-color: #000;
+.vertical-group {
   display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: 20px;
+  flex-direction: column;
 }
 
-.video-player {
-  width: 100%;
-  height: 100%;
-}
-
-.video-placeholder {
-  color: #909399;
-  text-align: center;
-}
-
-.video-placeholder .el-icon {
-  margin-bottom: 10px;
-}
-
-.video-controls {
-  padding: 10px 0;
-}
-
-.control-buttons {
-  margin-top: 10px;
+.preset-control {
   display: flex;
-  justify-content: center;
+  flex-direction: column;
+  gap: 10px;
 }
 
-.playback-container {
-  min-height: 400px;
+.el-button-group .el-button {
+  margin-left: -1px;
 }
 
-.playback-timeline {
-  height: 400px;
-  overflow-y: auto;
-}
-
-.custom-tree-node {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  font-size: 14px;
-  padding-right: 8px;
-}
-
+/* 摄像头状态样式 */
 .camera-status {
-  margin-left: 10px;
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #fff;
+  font-size: 14px;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+  z-index: 1;
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  background: #67c23a;
+  border-radius: 50%;
+  box-shadow: 0 0 8px #67c23a;
+  animation: pulse 2s infinite;
+}
+
+/* 时间戳样式 */
+.timestamp {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  color: #fff;
+  font-family: monospace;
+  font-size: 14px;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+  z-index: 1;
+}
+
+/* 位置信息样式 */
+.location-info {
+  position: absolute;
+  bottom: 16px;
+  left: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  color: #fff;
+  font-size: 14px;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+  z-index: 1;
+}
+
+/* 设备信息样式 */
+.device-info {
+  position: absolute;
+  bottom: 16px;
+  right: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+  color: #fff;
+  font-size: 14px;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+  z-index: 1;
+}
+
+/* 添加闪烁动画 */
+@keyframes pulse {
+  0% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.5;
+    transform: scale(1.1);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* 选中状态的视频窗口 */
+.video-item.active {
+  border: 2px solid var(--el-color-primary);
+  border-radius: 4px;
 }
 </style> 

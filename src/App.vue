@@ -2,7 +2,6 @@
   <el-container class="app-container">
     <el-aside width="220px" class="aside">
       <div class="logo">
-        <div class="logo-icon">CD</div>
         <span>微山创达智慧园区</span>
       </div>
       
