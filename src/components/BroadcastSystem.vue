@@ -317,7 +317,7 @@ const deviceGroups = ref([
         id: 'A001',
         name: 'A区主广播',
         location: 'A区大厅',
-        lastHeartbeat: '2024-03-20 10:00:00',
+        lastHeartbeat: '2025-05-20 10:00:00',
         volume: 80,
         signal: '强'
       },
@@ -328,7 +328,7 @@ const deviceGroups = ref([
         id: 'A002',
         name: 'A区副广播',
         location: 'A区走廊',
-        lastHeartbeat: '2024-03-20 10:00:00',
+        lastHeartbeat: '2025-05-20 10:00:00',
         volume: 75,
         signal: '中'
       },
@@ -339,7 +339,7 @@ const deviceGroups = ref([
         id: 'A003',
         name: 'A区会议室广播',
         location: 'A区会议室',
-        lastHeartbeat: '2024-03-20 10:00:00',
+        lastHeartbeat: '2025-05-20 10:00:00',
         volume: 70,
         signal: '强'
       }
@@ -355,7 +355,7 @@ const deviceGroups = ref([
         id: 'B001',
         name: 'B区主广播',
         location: 'B区大厅',
-        lastHeartbeat: '2024-03-20 09:30:00',
+        lastHeartbeat: '2025-05-20 09:30:00',
         volume: 0,
         signal: '无'
       },
@@ -366,7 +366,7 @@ const deviceGroups = ref([
         id: 'B002',
         name: 'B区走廊广播',
         location: 'B区走廊',
-        lastHeartbeat: '2024-03-20 10:00:00',
+        lastHeartbeat: '2025-05-20 10:00:00',
         volume: 65,
         signal: '弱'
       }
@@ -382,7 +382,7 @@ const deviceGroups = ref([
         id: 'C001',
         name: 'C区主广播',
         location: 'C区大厅',
-        lastHeartbeat: '2024-03-20 10:00:00',
+        lastHeartbeat: '2025-05-20 10:00:00',
         volume: 85,
         signal: '强'
       },
@@ -393,7 +393,7 @@ const deviceGroups = ref([
         id: 'C002',
         name: 'C区休息区广播',
         location: 'C区休息区',
-        lastHeartbeat: '2024-03-20 10:00:00',
+        lastHeartbeat: '2025-05-20 10:00:00',
         volume: 60,
         signal: '中'
       }

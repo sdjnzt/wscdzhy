@@ -256,7 +256,7 @@ const deviceGroups = ref([
         id: 'YF001',
         name: '研发楼正门门禁',
         location: '研发楼1层',
-        lastHeartbeat: '2024-03-20 08:30:00'
+        lastHeartbeat: '2025-05-20 08:30:00'
       },
       {
         label: '研发中心',
@@ -265,7 +265,7 @@ const deviceGroups = ref([
         id: 'YF002',
         name: '研发中心门禁',
         location: '研发楼3层',
-        lastHeartbeat: '2024-03-20 08:30:00'
+        lastHeartbeat: '2025-05-20 08:30:00'
       },
       {
         label: '实验室',
@@ -274,7 +274,7 @@ const deviceGroups = ref([
         id: 'YF003',
         name: '实验室门禁',
         location: '研发楼4层',
-        lastHeartbeat: '2024-03-20 08:30:00'
+        lastHeartbeat: '2025-05-20 08:30:00'
       }
     ]
   },
@@ -288,7 +288,7 @@ const deviceGroups = ref([
         id: 'SC001',
         name: '生产楼正门门禁',
         location: '生产楼1层',
-        lastHeartbeat: '2024-03-20 08:30:00'
+        lastHeartbeat: '2025-05-20 08:30:00'
       },
       {
         label: '生产车间',
@@ -297,7 +297,7 @@ const deviceGroups = ref([
         id: 'SC002',
         name: '生产车间门禁',
         location: '生产楼2层',
-        lastHeartbeat: '2024-03-20 08:30:00'
+        lastHeartbeat: '2025-05-20 08:30:00'
       },
       {
         label: '物料仓库',
@@ -306,7 +306,7 @@ const deviceGroups = ref([
         id: 'SC003',
         name: '物料仓库门禁',
         location: '生产楼1层',
-        lastHeartbeat: '2024-03-20 08:30:00'
+        lastHeartbeat: '2025-05-20 08:30:00'
       }
     ]
   }
@@ -367,70 +367,70 @@ const permissionList = ref([
 // 开门记录
 const accessRecords = ref([
   {
-    time: '2024-03-20 08:25:00',
+    time: '2025-05-20 08:25:00',
     name: '张明',
     type: '人脸',
     device: '行政楼正门门禁',
     status: 'success'
   },
   {
-    time: '2024-03-20 08:26:00',
+    time: '2025-05-20 08:26:00',
     name: '李华',
     type: '人脸',
     device: '行政楼正门门禁',
     status: 'success'
   },
   {
-    time: '2024-03-20 08:27:00',
+    time: '2025-05-20 08:27:00',
     name: '王强',
     type: '人脸',
     device: '研发楼正门门禁',
     status: 'success'
   },
   {
-    time: '2024-03-20 08:28:00',
+    time: '2025-05-20 08:28:00',
     name: '赵敏',
     type: '人脸',
     device: '生产楼正门门禁',
     status: 'success'
   },
   {
-    time: '2024-03-20 09:00:00',
+    time: '2025-05-20 09:00:00',
     name: '陈工',
     type: '访客码',
     device: '行政楼正门门禁',
     status: 'success'
   },
   {
-    time: '2024-03-20 09:05:00',
+    time: '2025-05-20 09:05:00',
     name: '刘工',
     type: '访客码',
     device: '行政楼正门门禁',
     status: 'success'
   },
   {
-    time: '2024-03-20 09:10:00',
+    time: '2025-05-20 09:10:00',
     name: '未知人员',
     type: '人脸',
     device: '研发楼正门门禁',
     status: 'failed'
   },
   {
-    time: '2024-03-20 09:15:00',
+    time: '2025-05-20 09:15:00',
     name: '张明',
     type: '人脸',
     device: '行政楼办公区门禁',
     status: 'success'
   },
   {
-    time: '2024-03-20 09:20:00',
+    time: '2025-05-20 09:20:00',
     name: '王强',
     type: '人脸',
     device: '研发中心门禁',
     status: 'success'
   },
   {
-    time: '2024-03-20 09:25:00',
+    time: '2025-05-20 09:25:00',
     name: '赵敏',
     type: '人脸',
     device: '生产车间门禁',

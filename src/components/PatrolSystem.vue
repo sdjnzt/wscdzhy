@@ -326,7 +326,7 @@ const pointGroups = ref([
         id: 'A001',
         name: 'A区大门',
         location: 'A区大门',
-        lastCheck: '2024-03-20 10:00:00',
+        lastCheck: '2025-05-20 10:00:00',
         battery: '90%',
         signal: '强'
       },
@@ -337,7 +337,7 @@ const pointGroups = ref([
         id: 'A002',
         name: 'A区走廊',
         location: 'A区走廊',
-        lastCheck: '2024-03-20 10:00:00',
+        lastCheck: '2025-05-20 10:00:00',
         battery: '85%',
         signal: '中'
       },
@@ -348,7 +348,7 @@ const pointGroups = ref([
         id: 'A003',
         name: 'A区会议室',
         location: 'A区会议室',
-        lastCheck: '2024-03-20 10:00:00',
+        lastCheck: '2025-05-20 10:00:00',
         battery: '95%',
         signal: '强'
       },
@@ -359,7 +359,7 @@ const pointGroups = ref([
         id: 'A004',
         name: 'A区休息区',
         location: 'A区休息区',
-        lastCheck: '2024-03-20 10:00:00',
+        lastCheck: '2025-05-20 10:00:00',
         battery: '88%',
         signal: '中'
       }
@@ -375,7 +375,7 @@ const pointGroups = ref([
         id: 'B001',
         name: 'B区大门',
         location: 'B区大门',
-        lastCheck: '2024-03-20 09:30:00',
+        lastCheck: '2025-05-20 09:30:00',
         battery: '0%',
         signal: '无'
       },
@@ -386,7 +386,7 @@ const pointGroups = ref([
         id: 'B002',
         name: 'B区走廊',
         location: 'B区走廊',
-        lastCheck: '2024-03-20 10:00:00',
+        lastCheck: '2025-05-20 10:00:00',
         battery: '75%',
         signal: '弱'
       },
@@ -397,7 +397,7 @@ const pointGroups = ref([
         id: 'B003',
         name: 'B区设备间',
         location: 'B区设备间',
-        lastCheck: '2024-03-20 10:00:00',
+        lastCheck: '2025-05-20 10:00:00',
         battery: '82%',
         signal: '中'
       }
@@ -413,7 +413,7 @@ const pointGroups = ref([
         id: 'C001',
         name: 'C区大门',
         location: 'C区大门',
-        lastCheck: '2024-03-20 10:00:00',
+        lastCheck: '2025-05-20 10:00:00',
         battery: '92%',
         signal: '强'
       },
@@ -424,7 +424,7 @@ const pointGroups = ref([
         id: 'C002',
         name: 'C区走廊',
         location: 'C区走廊',
-        lastCheck: '2024-03-20 10:00:00',
+        lastCheck: '2025-05-20 10:00:00',
         battery: '78%',
         signal: '中'
       },
@@ -435,7 +435,7 @@ const pointGroups = ref([
         id: 'C003',
         name: 'C区仓库',
         location: 'C区仓库',
-        lastCheck: '2024-03-20 10:00:00',
+        lastCheck: '2025-05-20 10:00:00',
         battery: '85%',
         signal: '强'
       }

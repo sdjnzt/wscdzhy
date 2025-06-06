@@ -243,7 +243,7 @@
           <el-table-column prop="phone" label="联系电话" width="150" />
           <el-table-column label="添加时间" width="180">
             <template #default="scope">
-              <span>2024-03-{{ 10 + Math.floor(Math.random() * 10) }} {{ Math.floor(Math.random() * 24) }}:{{ Math.floor(Math.random() * 60) }}:{{ Math.floor(Math.random() * 60) }}</span>
+              <span>2025-05-{{ 10 + Math.floor(Math.random() * 10) }} {{ Math.floor(Math.random() * 24) }}:{{ Math.floor(Math.random() * 60) }}:{{ Math.floor(Math.random() * 60) }}</span>
             </template>
           </el-table-column>
           <el-table-column label="操作" width="200">
@@ -1168,7 +1168,7 @@ const recognitionRecords = ref([
     name: '张伟',
     identity: '研发部主管',
     location: 'A区大门',
-    time: '2024-03-20 10:12:35',
+    time: '2025-05-20 10:12:35',
     type: 'success',
     similarity: 96,
     access: true
@@ -1177,7 +1177,7 @@ const recognitionRecords = ref([
     name: '未知人员',
     identity: '未登记',
     location: 'B区侧门',
-    time: '2024-03-20 10:08:22',
+    time: '2025-05-20 10:08:22',
     type: 'warning',
     similarity: 42,
     access: false
@@ -1186,7 +1186,7 @@ const recognitionRecords = ref([
     name: '王丽',
     identity: '财务部经理',
     location: 'A区办公楼',
-    time: '2024-03-20 09:56:47',
+    time: '2025-05-20 09:56:47',
     type: 'success',
     similarity: 98,
     access: true
@@ -1195,7 +1195,7 @@ const recognitionRecords = ref([
     name: '刘强',
     identity: '安保人员',
     location: 'C区大厅',
-    time: '2024-03-20 09:43:11',
+    time: '2025-05-20 09:43:11',
     type: 'success',
     similarity: 95,
     access: true
@@ -1204,7 +1204,7 @@ const recognitionRecords = ref([
     name: '陈美',
     identity: '市场部专员',
     location: 'D区会议室',
-    time: '2024-03-20 09:32:50',
+    time: '2025-05-20 09:32:50',
     type: 'success',
     similarity: 93,
     access: true
@@ -1213,7 +1213,7 @@ const recognitionRecords = ref([
     name: '李明',
     identity: '临时访客',
     location: 'A区大门',
-    time: '2024-03-20 09:28:15',
+    time: '2025-05-20 09:28:15',
     type: 'success',
     similarity: 89,
     access: true
@@ -1222,7 +1222,7 @@ const recognitionRecords = ref([
     name: '未知人员',
     identity: '未登记',
     location: 'C区后门',
-    time: '2024-03-20 09:17:03',
+    time: '2025-05-20 09:17:03',
     type: 'warning',
     similarity: 36,
     access: false
@@ -1231,7 +1231,7 @@ const recognitionRecords = ref([
     name: '张红',
     identity: '人事主管',
     location: 'B区办公楼',
-    time: '2024-03-20 09:05:42',
+    time: '2025-05-20 09:05:42',
     type: 'success',
     similarity: 97,
     access: true
@@ -1240,7 +1240,7 @@ const recognitionRecords = ref([
     name: '赵刚',
     identity: '技术总监',
     location: 'A区会议室',
-    time: '2024-03-20 08:52:19',
+    time: '2025-05-20 08:52:19',
     type: 'success',
     similarity: 99,
     access: true
@@ -1249,7 +1249,7 @@ const recognitionRecords = ref([
     name: '未知人员',
     identity: '未登记',
     location: 'D区停车场',
-    time: '2024-03-20 08:45:33',
+    time: '2025-05-20 08:45:33',
     type: 'warning',
     similarity: 48,
     access: false
@@ -1327,17 +1327,17 @@ const gatesPageSize = ref(10)
 
 // 门禁管理
 const gatesList = ref([
-  { id: 'GATE001', name: 'A区大门', location: 'A区入口', type: '门禁闸机', deviceId: 'CAM001', status: 'active', lastMaintenance: '2024-03-15', todayAccessCount: 86 },
-  { id: 'GATE002', name: 'B区大门', location: 'B区入口', type: '门禁闸机', deviceId: 'CAM002', status: 'active', lastMaintenance: '2024-03-10', todayAccessCount: 64 },
-  { id: 'GATE003', name: 'C区大门', location: 'C区入口', type: '门禁闸机', deviceId: 'CAM003', status: 'inactive', lastMaintenance: '2024-03-08', todayAccessCount: 0 },
-  { id: 'GATE004', name: 'D区大门', location: 'D区入口', type: '门禁闸机', deviceId: 'CAM004', status: 'active', lastMaintenance: '2024-03-12', todayAccessCount: 52 },
-  { id: 'GATE005', name: '研发部门', location: 'A区2楼', type: '智能门锁', deviceId: '', status: 'active', lastMaintenance: '2024-03-14', todayAccessCount: 37 },
-  { id: 'GATE006', name: '财务部门', location: 'B区1楼', type: '智能门锁', deviceId: '', status: 'active', lastMaintenance: '2024-03-16', todayAccessCount: 23 },
-  { id: 'GATE007', name: '机房', location: 'C区地下室', type: '人脸门禁', deviceId: '', status: 'active', lastMaintenance: '2024-03-18', todayAccessCount: 12 },
-  { id: 'GATE008', name: '会议室A', location: 'A区1楼', type: '智能门锁', deviceId: '', status: 'active', lastMaintenance: '2024-03-17', todayAccessCount: 28 },
-  { id: 'GATE009', name: '会议室B', location: 'B区2楼', type: '智能门锁', deviceId: '', status: 'active', lastMaintenance: '2024-03-16', todayAccessCount: 15 },
-  { id: 'GATE010', name: '食堂', location: 'D区1楼', type: '门禁闸机', deviceId: '', status: 'active', lastMaintenance: '2024-03-14', todayAccessCount: 95 },
-  { id: 'GATE011', name: '档案室', location: 'B区地下室', type: '人脸门禁', deviceId: '', status: 'active', lastMaintenance: '2024-03-13', todayAccessCount: 8 },
+  { id: 'GATE001', name: 'A区大门', location: 'A区入口', type: '门禁闸机', deviceId: 'CAM001', status: 'active', lastMaintenance: '2025-05-15', todayAccessCount: 86 },
+  { id: 'GATE002', name: 'B区大门', location: 'B区入口', type: '门禁闸机', deviceId: 'CAM002', status: 'active', lastMaintenance: '2025-05-10', todayAccessCount: 64 },
+  { id: 'GATE003', name: 'C区大门', location: 'C区入口', type: '门禁闸机', deviceId: 'CAM003', status: 'inactive', lastMaintenance: '2025-05-08', todayAccessCount: 0 },
+  { id: 'GATE004', name: 'D区大门', location: 'D区入口', type: '门禁闸机', deviceId: 'CAM004', status: 'active', lastMaintenance: '2025-05-12', todayAccessCount: 52 },
+  { id: 'GATE005', name: '研发部门', location: 'A区2楼', type: '智能门锁', deviceId: '', status: 'active', lastMaintenance: '2025-05-14', todayAccessCount: 37 },
+  { id: 'GATE006', name: '财务部门', location: 'B区1楼', type: '智能门锁', deviceId: '', status: 'active', lastMaintenance: '2025-05-16', todayAccessCount: 23 },
+  { id: 'GATE007', name: '机房', location: 'C区地下室', type: '人脸门禁', deviceId: '', status: 'active', lastMaintenance: '2025-05-18', todayAccessCount: 12 },
+  { id: 'GATE008', name: '会议室A', location: 'A区1楼', type: '智能门锁', deviceId: '', status: 'active', lastMaintenance: '2025-05-17', todayAccessCount: 28 },
+  { id: 'GATE009', name: '会议室B', location: 'B区2楼', type: '智能门锁', deviceId: '', status: 'active', lastMaintenance: '2025-05-16', todayAccessCount: 15 },
+  { id: 'GATE010', name: '食堂', location: 'D区1楼', type: '门禁闸机', deviceId: '', status: 'active', lastMaintenance: '2025-05-14', todayAccessCount: 95 },
+  { id: 'GATE011', name: '档案室', location: 'B区地下室', type: '人脸门禁', deviceId: '', status: 'active', lastMaintenance: '2025-05-13', todayAccessCount: 8 },
   { id: 'GATE012', name: '实验室', location: 'C区3楼', type: '指纹门禁', deviceId: '', status: 'active', lastMaintenance: '2025-05-12', todayAccessCount: 14 },
   { id: 'GATE013', name: '总经理办公室', location: 'A区3楼', type: '人脸门禁', deviceId: '', status: 'active', lastMaintenance: '2025-05-15', todayAccessCount: 6 },
   { id: 'GATE014', name: '停车场入口', location: 'E区地面', type: '车牌识别', deviceId: '', status: 'active', lastMaintenance: '2025-05-10', todayAccessCount: 78 },
@@ -1368,7 +1368,7 @@ const accessLogPageSize = ref(10)
 const accessLogs = ref([
   { 
     id: 1,
-    time: '2024-03-20 08:45:22', 
+    time: '2025-05-20 08:45:22',
     name: '张伟', 
     gateName: 'A区大门',
     gateId: 'GATE001', 
@@ -1380,7 +1380,7 @@ const accessLogs = ref([
   },
   { 
     id: 2,
-    time: '2024-03-20 08:50:15', 
+    time: '2025-05-20 08:50:15',
     name: '王丽', 
     gateName: 'B区大门', 
     gateId: 'GATE002',
@@ -1392,7 +1392,7 @@ const accessLogs = ref([
   },
   { 
     id: 3,
-    time: '2024-03-20 09:05:30', 
+    time: '2025-05-20 09:05:30',
     name: '未知人员', 
     gateName: 'C区大门', 
     gateId: 'GATE003',
@@ -1404,7 +1404,7 @@ const accessLogs = ref([
   },
   { 
     id: 4,
-    time: '2024-03-20 09:12:45', 
+    time: '2025-05-20 09:12:45',
     name: '刘强', 
     gateName: 'A区大门', 
     gateId: 'GATE001',
@@ -1416,7 +1416,7 @@ const accessLogs = ref([
   },
   { 
     id: 5,
-    time: '2024-03-20 09:30:18', 
+    time: '2025-05-20 09:30:18',
     name: '李明', 
     gateName: 'A区大门', 
     gateId: 'GATE001',
@@ -1428,7 +1428,7 @@ const accessLogs = ref([
   },
   { 
     id: 6,
-    time: '2024-03-20 10:15:06', 
+    time: '2025-05-20 10:15:06',
     name: '赵刚', 
     gateName: '机房', 
     gateId: 'GATE007',
@@ -1440,7 +1440,7 @@ const accessLogs = ref([
   },
   { 
     id: 7,
-    time: '2024-03-20 11:35:29', 
+    time: '2025-05-20 11:35:29',
     name: '陈美', 
     gateName: '研发部门', 
     gateId: 'GATE005',

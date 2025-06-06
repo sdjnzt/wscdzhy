@@ -247,7 +247,7 @@ const deviceGroups = ref([
         id: 'XZ001',
         name: '行政楼入口道闸',
         location: '行政楼入口',
-        lastHeartbeat: '2024-03-20 08:30:00'
+        lastHeartbeat: '2025-05-20 08:30:00'
       },
       {
         label: '行政楼出口',
@@ -256,7 +256,7 @@ const deviceGroups = ref([
         id: 'XZ002',
         name: '行政楼出口道闸',
         location: '行政楼出口',
-        lastHeartbeat: '2024-03-20 08:30:00'
+        lastHeartbeat: '2025-05-20 08:30:00'
       }
     ]
   },
@@ -270,7 +270,7 @@ const deviceGroups = ref([
         id: 'YF001',
         name: '研发楼入口道闸',
         location: '研发楼入口',
-        lastHeartbeat: '2024-03-20 08:30:00'
+        lastHeartbeat: '2025-05-20 08:30:00'
       },
       {
         label: '研发楼出口',
@@ -279,7 +279,7 @@ const deviceGroups = ref([
         id: 'YF002',
         name: '研发楼出口道闸',
         location: '研发楼出口',
-        lastHeartbeat: '2024-03-20 08:30:00'
+        lastHeartbeat: '2025-05-20 08:30:00'
       }
     ]
   }
@@ -299,7 +299,7 @@ const vehicleList = ref([
     owner: '张明',
     phone: '13812345678',
     department: '行政部',
-    validTime: '2024-01-01 至 2024-12-31',
+    validTime: '2025-05-01 至 2025-12-31',
     status: 'active'
   },
   {
@@ -308,7 +308,7 @@ const vehicleList = ref([
     owner: '李华',
     phone: '13987654321',
     department: '研发部',
-    validTime: '2024-01-01 至 2024-12-31',
+    validTime: '2025-05-01 至 2025-12-31',
     status: 'active'
   },
   {
@@ -317,7 +317,7 @@ const vehicleList = ref([
     owner: '王强',
     phone: '13765432198',
     department: '市场部',
-    validTime: '2024-03-01 至 2024-03-31',
+    validTime: '2025-05-01 至 2025-05-31',
     status: 'active'
   },
   {
@@ -326,7 +326,7 @@ const vehicleList = ref([
     owner: '赵敏',
     phone: '13698765432',
     department: '财务部',
-    validTime: '2024-01-01 至 2024-12-31',
+    validTime: '2025-05-01 至 2025-12-31',
     status: 'active'
   },
   {
@@ -335,7 +335,7 @@ const vehicleList = ref([
     owner: '陈工',
     phone: '13567891234',
     department: '生产部',
-    validTime: '2024-01-01 至 2024-12-31',
+    validTime: '2025-05-01 至 2025-12-31',
     status: 'active'
   },
   {
@@ -344,7 +344,7 @@ const vehicleList = ref([
     owner: '刘工',
     phone: '13456789123',
     department: '质量部',
-    validTime: '2024-01-01 至 2024-12-31',
+    validTime: '2025-05-01 至 2025-12-31',
     status: 'active'
   },
   {
@@ -353,7 +353,7 @@ const vehicleList = ref([
     owner: '孙工',
     phone: '13345678912',
     department: '采购部',
-    validTime: '2024-01-01 至 2024-12-31',
+    validTime: '2025-05-01 至 2025-12-31',
     status: 'active'
   },
   {
@@ -362,7 +362,7 @@ const vehicleList = ref([
     owner: '周工',
     phone: '13234567891',
     department: '人事部',
-    validTime: '2024-01-01 至 2024-12-31',
+    validTime: '2025-05-01 至 2025-12-31',
     status: 'active'
   },
   {
@@ -371,7 +371,7 @@ const vehicleList = ref([
     owner: '吴工',
     phone: '13123456789',
     department: '行政部',
-    validTime: '2024-01-01 至 2024-12-31',
+    validTime: '2025-05-01 至 2025-12-31',
     status: 'active'
   },
   {
@@ -380,7 +380,7 @@ const vehicleList = ref([
     owner: '郑工',
     phone: '13012345678',
     department: '研发部',
-    validTime: '2024-01-01 至 2024-12-31',
+    validTime: '2025-05-01 至 2025-12-31',
     status: 'active'
   }
 ])
@@ -838,7 +838,7 @@ const handleAddVehicle = () => {
       owner: '',
       phone: '',
       department: '',
-      validTime: '2024-01-01 至 2024-12-31',
+      validTime: '2025-05-01 至 2025-12-31',
       status: 'active'
     }
     vehicleList.value.unshift(newVehicle)

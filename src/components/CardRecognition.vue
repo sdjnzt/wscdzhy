@@ -307,7 +307,7 @@ const deviceGroups = ref([
         id: 'A001',
         name: 'A区大门读卡器',
         location: 'A区大门',
-        lastHeartbeat: '2024-03-20 10:00:00',
+        lastHeartbeat: '2025-05-20 10:00:00',
         signal: '强',
         battery: '90%'
       },
@@ -318,7 +318,7 @@ const deviceGroups = ref([
         id: 'A002',
         name: 'A区电梯读卡器',
         location: 'A区电梯',
-        lastHeartbeat: '2024-03-20 10:00:00',
+        lastHeartbeat: '2025-05-20 10:00:00',
         signal: '中',
         battery: '85%'
       },
@@ -329,7 +329,7 @@ const deviceGroups = ref([
         id: 'A003',
         name: 'A区会议室读卡器',
         location: 'A区会议室',
-        lastHeartbeat: '2024-03-20 10:00:00',
+        lastHeartbeat: '2025-05-20 10:00:00',
         signal: '强',
         battery: '95%'
       }
@@ -345,7 +345,7 @@ const deviceGroups = ref([
         id: 'B001',
         name: 'B区大门读卡器',
         location: 'B区大门',
-        lastHeartbeat: '2024-03-20 09:30:00',
+        lastHeartbeat: '2025-05-20 09:30:00',
         signal: '无',
         battery: '0%'
       },
@@ -356,7 +356,7 @@ const deviceGroups = ref([
         id: 'B002',
         name: 'B区走廊读卡器',
         location: 'B区走廊',
-        lastHeartbeat: '2024-03-20 10:00:00',
+        lastHeartbeat: '2025-05-20 10:00:00',
         signal: '弱',
         battery: '60%'
       }
@@ -372,7 +372,7 @@ const deviceGroups = ref([
         id: 'C001',
         name: 'C区大门读卡器',
         location: 'C区大门',
-        lastHeartbeat: '2024-03-20 10:00:00',
+        lastHeartbeat: '2025-05-20 10:00:00',
         signal: '强',
         battery: '88%'
       },
@@ -383,7 +383,7 @@ const deviceGroups = ref([
         id: 'C002',
         name: 'C区休息区读卡器',
         location: 'C区休息区',
-        lastHeartbeat: '2024-03-20 10:00:00',
+        lastHeartbeat: '2025-05-20 10:00:00',
         signal: '中',
         battery: '75%'
       }
@@ -404,8 +404,8 @@ const cardList = ref([
     type: 'employee',
     owner: '王建国',
     department: '技术部',
-    validFrom: '2024-01-01',
-    validTo: '2024-12-31',
+    validFrom: '2025-05-01',
+    validTo: '2025-12-31',
     status: 'active',
     phone: '13905311234'
   },
@@ -414,8 +414,8 @@ const cardList = ref([
     type: 'visitor',
     owner: '张丽华',
     department: '访客',
-    validFrom: '2024-03-20',
-    validTo: '2024-03-20',
+    validFrom: '2025-05-20',
+    validTo: '2025-05-20',
     status: 'expired',
     phone: '13805322345'
   },
@@ -424,8 +424,8 @@ const cardList = ref([
     type: 'employee',
     owner: '刘志强',
     department: '行政部',
-    validFrom: '2024-01-01',
-    validTo: '2024-12-31',
+    validFrom: '2025-05-01',
+    validTo: '2025-12-31',
     status: 'active',
     phone: '13705333456'
   },
@@ -434,7 +434,7 @@ const cardList = ref([
     type: 'temporary',
     owner: '周晓明',
     department: '外包人员',
-    validFrom: '2024-03-01',
+    validFrom: '2025-05-01',
     validTo: '2024-06-30',
     status: 'active',
     phone: '13605344567'
@@ -444,8 +444,8 @@ const cardList = ref([
     type: 'employee',
     owner: '吴秀英',
     department: '人事部',
-    validFrom: '2024-01-01',
-    validTo: '2024-12-31',
+    validFrom: '2025-05-01',
+    validTo: '2025-12-31',
     status: 'lost',
     phone: '13505355678'
   },
@@ -454,8 +454,8 @@ const cardList = ref([
     type: 'employee',
     owner: '郑志明',
     department: '财务部',
-    validFrom: '2024-01-01',
-    validTo: '2024-12-31',
+    validFrom: '2025-05-01',
+    validTo: '2025-12-31',
     status: 'inactive',
     phone: '13405366789'
   },
@@ -464,8 +464,8 @@ const cardList = ref([
     type: 'visitor',
     owner: '林美玲',
     department: '访客',
-    validFrom: '2024-03-21',
-    validTo: '2024-03-21',
+    validFrom: '2025-05-21',
+    validTo: '2025-05-21',
     status: 'active',
     phone: '13305377890'
   },
@@ -474,7 +474,7 @@ const cardList = ref([
     type: 'temporary',
     owner: '黄建国',
     department: '外包人员',
-    validFrom: '2024-03-01',
+    validFrom: '2025-05-01',
     validTo: '2024-09-30',
     status: 'active',
     phone: '13205388901'

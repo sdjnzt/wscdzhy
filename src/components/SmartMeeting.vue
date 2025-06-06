@@ -344,7 +344,7 @@ const roomGroups = ref([
         facilities: ['投影仪', '视频会议系统', '音响系统', '电子白板', '无线投屏'],
         area: '120平方米',
         location: 'A区3楼',
-        lastMaintenance: '2024-03-15'
+        lastMaintenance: '2025-05-15'
       },
       {
         label: 'A区小会议室',
@@ -356,7 +356,7 @@ const roomGroups = ref([
         facilities: ['投影仪', '视频会议系统', '电子白板'],
         area: '60平方米',
         location: 'A区3楼',
-        lastMaintenance: '2024-03-15'
+        lastMaintenance: '2025-05-15'
       },
       {
         label: 'A区培训室',
@@ -368,7 +368,7 @@ const roomGroups = ref([
         facilities: ['投影仪', '视频会议系统', '音响系统', '电子白板', '无线投屏', '录播系统'],
         area: '200平方米',
         location: 'A区4楼',
-        lastMaintenance: '2024-03-15'
+        lastMaintenance: '2025-05-15'
       }
     ]
   },
@@ -385,7 +385,7 @@ const roomGroups = ref([
         facilities: ['投影仪', '视频会议系统', '音响系统', '电子白板'],
         area: '80平方米',
         location: 'B区2楼',
-        lastMaintenance: '2024-03-15'
+        lastMaintenance: '2025-05-15'
       },
       {
         label: 'B区洽谈室',
@@ -397,7 +397,7 @@ const roomGroups = ref([
         facilities: ['视频会议系统', '电子白板'],
         area: '40平方米',
         location: 'B区2楼',
-        lastMaintenance: '2024-03-15'
+        lastMaintenance: '2025-05-15'
       }
     ]
   },
@@ -414,7 +414,7 @@ const roomGroups = ref([
         facilities: ['投影仪', '视频会议系统', '音响系统', '电子白板', '无线投屏'],
         area: '100平方米',
         location: 'C区1楼',
-        lastMaintenance: '2024-03-15'
+        lastMaintenance: '2025-05-15'
       },
       {
         label: 'C区多功能厅',
@@ -426,7 +426,7 @@ const roomGroups = ref([
         facilities: ['投影仪', '视频会议系统', '音响系统', '电子白板', '无线投屏', '录播系统', '舞台灯光'],
         area: '300平方米',
         location: 'C区1楼',
-        lastMaintenance: '2024-03-15'
+        lastMaintenance: '2025-05-15'
       }
     ]
   }
@@ -467,8 +467,8 @@ const bookingList = ref([
     title: '项目启动会',
     room: 'A区大会议室',
     organizer: '王建国',
-    startTime: '2024-03-20 10:00:00',
-    endTime: '2024-03-20 11:00:00',
+    startTime: '2025-05-20 10:00:00',
+    endTime: '2025-05-20 11:00:00',
     status: 'pending',
     type: 'normal',
     attendees: ['张丽华', '刘志强', '周晓明'],
@@ -478,8 +478,8 @@ const bookingList = ref([
     title: '技术评审会',
     room: 'A区小会议室',
     organizer: '郑志明',
-    startTime: '2024-03-20 14:00:00',
-    endTime: '2024-03-20 15:00:00',
+    startTime: '2025-05-20 14:00:00',
+    endTime: '2025-05-20 15:00:00',
     status: 'completed',
     type: 'video',
     attendees: ['王建国', '林美玲', '黄建国'],
@@ -489,8 +489,8 @@ const bookingList = ref([
     title: '新员工培训',
     room: 'A区培训室',
     organizer: '周晓明',
-    startTime: '2024-03-21 09:00:00',
-    endTime: '2024-03-21 17:00:00',
+    startTime: '2025-05-21 09:00:00',
+    endTime: '2025-05-21 17:00:00',
     status: 'pending',
     type: 'training',
     attendees: ['王建国', '张丽华', '刘志强', '吴秀英'],
@@ -500,8 +500,8 @@ const bookingList = ref([
     title: '季度总结会',
     room: 'C区多功能厅',
     organizer: '吴秀英',
-    startTime: '2024-03-22 14:00:00',
-    endTime: '2024-03-22 17:00:00',
+    startTime: '2025-05-22 14:00:00',
+    endTime: '2025-05-22 17:00:00',
     status: 'pending',
     type: 'normal',
     attendees: ['王建国', '张丽华', '刘志强', '周晓明', '郑志明', '林美玲', '黄建国'],
@@ -516,28 +516,28 @@ const attendeeList = ref([
     department: '技术部',
     position: '技术总监',
     status: 'online',
-    joinTime: '2024-03-20 10:00:00'
+    joinTime: '2025-05-20 10:00:00'
   },
   {
     name: '张丽华',
     department: '产品部',
     position: '产品经理',
     status: 'online',
-    joinTime: '2024-03-20 10:01:00'
+    joinTime: '2025-05-20 10:01:00'
   },
   {
     name: '刘志强',
     department: '市场部',
     position: '市场总监',
     status: 'offline',
-    joinTime: '2024-03-20 10:05:00'
+    joinTime: '2025-05-20 10:05:00'
   },
   {
     name: '周晓明',
     department: '人事部',
     position: '人事经理',
     status: 'online',
-    joinTime: '2024-03-20 10:02:00'
+    joinTime: '2025-05-20 10:02:00'
   }
 ])
 
@@ -547,8 +547,8 @@ const historyRecords = ref([
     title: '项目启动会',
     room: 'A区大会议室',
     organizer: '王建国',
-    startTime: '2024-03-20 10:00:00',
-    endTime: '2024-03-20 11:00:00',
+    startTime: '2025-05-20 10:00:00',
+    endTime: '2025-05-20 11:00:00',
     duration: '1小时',
     attendeeCount: 15,
     status: 'completed',
@@ -559,8 +559,8 @@ const historyRecords = ref([
     title: '技术评审会',
     room: 'A区小会议室',
     organizer: '郑志明',
-    startTime: '2024-03-20 14:00:00',
-    endTime: '2024-03-20 15:00:00',
+    startTime: '2025-05-20 14:00:00',
+    endTime: '2025-05-20 15:00:00',
     duration: '1小时',
     attendeeCount: 8,
     status: 'completed',
@@ -571,8 +571,8 @@ const historyRecords = ref([
     title: '部门例会',
     room: 'B区会议室',
     organizer: '张丽华',
-    startTime: '2024-03-19 10:00:00',
-    endTime: '2024-03-19 11:00:00',
+    startTime: '2025-05-19 10:00:00',
+    endTime: '2025-05-19 11:00:00',
     duration: '1小时',
     attendeeCount: 12,
     status: 'completed',
@@ -583,8 +583,8 @@ const historyRecords = ref([
     title: '客户洽谈',
     room: 'B区洽谈室',
     organizer: '刘志强',
-    startTime: '2024-03-19 14:00:00',
-    endTime: '2024-03-19 15:30:00',
+    startTime: '2025-05-19 14:00:00',
+    endTime: '2025-05-19 15:30:00',
     duration: '1.5小时',
     attendeeCount: 6,
     status: 'completed',
