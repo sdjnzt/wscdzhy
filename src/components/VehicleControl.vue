@@ -294,7 +294,7 @@ const defaultProps = {
 // 车辆列表
 const vehicleList = ref([
   {
-    plateNumber: '鲁A·8K123',
+    plateNumber: '鲁H·8K123',
     vehicleType: '小型汽车',
     owner: '张明',
     phone: '13812345678',
@@ -303,7 +303,7 @@ const vehicleList = ref([
     status: 'active'
   },
   {
-    plateNumber: '鲁A·6M789',
+    plateNumber: '鲁H·6M789',
     vehicleType: '小型汽车',
     owner: '李华',
     phone: '13987654321',
@@ -312,7 +312,7 @@ const vehicleList = ref([
     status: 'active'
   },
   {
-    plateNumber: '鲁A·5N456',
+    plateNumber: '鲁H·5N456',
     vehicleType: '小型汽车',
     owner: '王强',
     phone: '13765432198',
@@ -321,7 +321,7 @@ const vehicleList = ref([
     status: 'active'
   },
   {
-    plateNumber: '鲁A·9P234',
+    plateNumber: '鲁H·9P234',
     vehicleType: '小型汽车',
     owner: '赵敏',
     phone: '13698765432',
@@ -330,7 +330,7 @@ const vehicleList = ref([
     status: 'active'
   },
   {
-    plateNumber: '鲁A·7Q567',
+    plateNumber: '鲁H·7Q567',
     vehicleType: '小型汽车',
     owner: '陈工',
     phone: '13567891234',
@@ -339,7 +339,7 @@ const vehicleList = ref([
     status: 'active'
   },
   {
-    plateNumber: '鲁A·4R890',
+    plateNumber: '鲁H·4R890',
     vehicleType: '小型汽车',
     owner: '刘工',
     phone: '13456789123',
@@ -348,7 +348,7 @@ const vehicleList = ref([
     status: 'active'
   },
   {
-    plateNumber: '鲁A·3S123',
+    plateNumber: '鲁H·3S123',
     vehicleType: '小型汽车',
     owner: '孙工',
     phone: '13345678912',
@@ -357,7 +357,7 @@ const vehicleList = ref([
     status: 'active'
   },
   {
-    plateNumber: '鲁A·2T456',
+    plateNumber: '鲁H·2T456',
     vehicleType: '小型汽车',
     owner: '周工',
     phone: '13234567891',
@@ -366,7 +366,7 @@ const vehicleList = ref([
     status: 'active'
   },
   {
-    plateNumber: '鲁A·1U789',
+    plateNumber: '鲁H·1U789',
     vehicleType: '小型汽车',
     owner: '吴工',
     phone: '13123456789',
@@ -375,7 +375,7 @@ const vehicleList = ref([
     status: 'active'
   },
   {
-    plateNumber: '鲁A·0V234',
+    plateNumber: '鲁H·0V234',
     vehicleType: '小型汽车',
     owner: '郑工',
     phone: '13012345678',
@@ -389,7 +389,7 @@ const vehicleList = ref([
 const passageRecords = ref([
   {
     time: '2025-05-20 08:25:00',
-    plateNumber: '鲁A·8K123',
+    plateNumber: '鲁H·8K123',
     vehicleType: '小型汽车',
     direction: '进入',
     device: '行政楼入口道闸',
@@ -398,7 +398,7 @@ const passageRecords = ref([
   },
   {
     time: '2025-05-20 08:26:00',
-    plateNumber: '鲁A·6M789',
+    plateNumber: '鲁H·6M789',
     vehicleType: '小型汽车',
     direction: '进入',
     device: '研发楼入口道闸',
@@ -407,7 +407,7 @@ const passageRecords = ref([
   },
   {
     time: '2025-05-20 08:27:00',
-    plateNumber: '鲁A·5N456',
+    plateNumber: '鲁H·5N456',
     vehicleType: '小型汽车',
     direction: '进入',
     device: '行政楼入口道闸',
@@ -416,7 +416,7 @@ const passageRecords = ref([
   },
   {
     time: '2025-05-20 08:28:00',
-    plateNumber: '鲁A·9P234',
+    plateNumber: '鲁H·9P234',
     vehicleType: '小型汽车',
     direction: '进入',
     device: '行政楼入口道闸',
@@ -425,7 +425,7 @@ const passageRecords = ref([
   },
   {
     time: '2025-05-20 08:29:00',
-    plateNumber: '鲁A·7Q567',
+    plateNumber: '鲁H·7Q567',
     vehicleType: '小型汽车',
     direction: '进入',
     device: '研发楼入口道闸',
@@ -434,7 +434,7 @@ const passageRecords = ref([
   },
   {
     time: '2025-05-20 08:30:00',
-    plateNumber: '鲁A·4R890',
+    plateNumber: '鲁H·4R890',
     vehicleType: '小型汽车',
     direction: '进入',
     device: '研发楼入口道闸',
@@ -443,7 +443,7 @@ const passageRecords = ref([
   },
   {
     time: '2025-05-20 09:00:00',
-    plateNumber: '鲁A·8K123',
+    plateNumber: '鲁H·8K123',
     vehicleType: '小型汽车',
     direction: '离开',
     device: '行政楼出口道闸',
@@ -461,7 +461,7 @@ const passageRecords = ref([
   },
   {
     time: '2025-05-20 09:30:00',
-    plateNumber: '鲁A·6M789',
+    plateNumber: '鲁H·6M789',
     vehicleType: '小型汽车',
     direction: '离开',
     device: '研发楼出口道闸',
@@ -470,7 +470,7 @@ const passageRecords = ref([
   },
   {
     time: '2025-05-20 10:00:00',
-    plateNumber: '鲁A·5N456',
+    plateNumber: '鲁H·5N456',
     vehicleType: '小型汽车',
     direction: '离开',
     device: '行政楼出口道闸',
@@ -479,7 +479,7 @@ const passageRecords = ref([
   },
   {
     time: '2025-05-20 10:15:00',
-    plateNumber: '鲁A·9P234',
+    plateNumber: '鲁H·9P234',
     vehicleType: '小型汽车',
     direction: '离开',
     device: '行政楼出口道闸',
@@ -488,7 +488,7 @@ const passageRecords = ref([
   },
   {
     time: '2025-05-20 10:30:00',
-    plateNumber: '鲁A·7Q567',
+    plateNumber: '鲁H·7Q567',
     vehicleType: '小型汽车',
     direction: '离开',
     device: '研发楼出口道闸',
@@ -497,7 +497,7 @@ const passageRecords = ref([
   },
   {
     time: '2025-05-20 11:00:00',
-    plateNumber: '鲁A·4R890',
+    plateNumber: '鲁H·4R890',
     vehicleType: '小型汽车',
     direction: '离开',
     device: '研发楼出口道闸',
@@ -506,7 +506,7 @@ const passageRecords = ref([
   },
   {
     time: '2025-05-20 11:30:00',
-    plateNumber: '鲁A·3S123',
+    plateNumber: '鲁H·3S123',
     vehicleType: '小型汽车',
     direction: '进入',
     device: '行政楼入口道闸',
@@ -515,7 +515,7 @@ const passageRecords = ref([
   },
   {
     time: '2025-05-20 11:35:00',
-    plateNumber: '鲁A·2T456',
+    plateNumber: '鲁H·2T456',
     vehicleType: '小型汽车',
     direction: '进入',
     device: '研发楼入口道闸',
@@ -524,7 +524,7 @@ const passageRecords = ref([
   },
   {
     time: '2025-05-20 11:40:00',
-    plateNumber: '鲁A·1U789',
+    plateNumber: '鲁H·1U789',
     vehicleType: '小型汽车',
     direction: '进入',
     device: '行政楼入口道闸',
@@ -533,7 +533,7 @@ const passageRecords = ref([
   },
   {
     time: '2025-05-20 11:45:00',
-    plateNumber: '鲁A·0V234',
+    plateNumber: '鲁H·0V234',
     vehicleType: '小型汽车',
     direction: '进入',
     device: '研发楼入口道闸',
@@ -542,7 +542,7 @@ const passageRecords = ref([
   },
   {
     time: '2025-05-20 12:00:00',
-    plateNumber: '鲁A·3S123',
+    plateNumber: '鲁H·3S123',
     vehicleType: '小型汽车',
     direction: '离开',
     device: '行政楼出口道闸',
@@ -551,7 +551,7 @@ const passageRecords = ref([
   },
   {
     time: '2025-05-20 12:05:00',
-    plateNumber: '鲁A·2T456',
+    plateNumber: '鲁H·2T456',
     vehicleType: '小型汽车',
     direction: '离开',
     device: '研发楼出口道闸',
@@ -560,7 +560,7 @@ const passageRecords = ref([
   },
   {
     time: '2025-05-20 12:10:00',
-    plateNumber: '鲁A·1U789',
+    plateNumber: '鲁H·1U789',
     vehicleType: '小型汽车',
     direction: '离开',
     device: '行政楼出口道闸',
@@ -569,7 +569,7 @@ const passageRecords = ref([
   },
   {
     time: '2025-05-20 12:15:00',
-    plateNumber: '鲁A·0V234',
+    plateNumber: '鲁H·0V234',
     vehicleType: '小型汽车',
     direction: '离开',
     device: '研发楼出口道闸',
@@ -578,7 +578,7 @@ const passageRecords = ref([
   },
   {
     time: '2025-05-20 13:30:00',
-    plateNumber: '鲁A·8K123',
+    plateNumber: '鲁H·8K123',
     vehicleType: '小型汽车',
     direction: '进入',
     device: '行政楼入口道闸',
@@ -587,7 +587,7 @@ const passageRecords = ref([
   },
   {
     time: '2025-05-20 13:35:00',
-    plateNumber: '鲁A·6M789',
+    plateNumber: '鲁H·6M789',
     vehicleType: '小型汽车',
     direction: '进入',
     device: '研发楼入口道闸',
@@ -596,7 +596,7 @@ const passageRecords = ref([
   },
   {
     time: '2025-05-20 13:40:00',
-    plateNumber: '鲁A·5N456',
+    plateNumber: '鲁H·5N456',
     vehicleType: '小型汽车',
     direction: '进入',
     device: '行政楼入口道闸',
@@ -605,7 +605,7 @@ const passageRecords = ref([
   },
   {
     time: '2025-05-20 13:45:00',
-    plateNumber: '鲁A·9P234',
+    plateNumber: '鲁H·9P234',
     vehicleType: '小型汽车',
     direction: '进入',
     device: '行政楼入口道闸',
@@ -614,7 +614,7 @@ const passageRecords = ref([
   },
   {
     time: '2025-05-20 13:50:00',
-    plateNumber: '鲁A·7Q567',
+    plateNumber: '鲁H·7Q567',
     vehicleType: '小型汽车',
     direction: '进入',
     device: '研发楼入口道闸',
@@ -623,7 +623,7 @@ const passageRecords = ref([
   },
   {
     time: '2025-05-20 13:55:00',
-    plateNumber: '鲁A·4R890',
+    plateNumber: '鲁H·4R890',
     vehicleType: '小型汽车',
     direction: '进入',
     device: '研发楼入口道闸',
@@ -632,7 +632,7 @@ const passageRecords = ref([
   },
   {
     time: '2025-05-20 14:00:00',
-    plateNumber: '鲁A·3S123',
+    plateNumber: '鲁H·3S123',
     vehicleType: '小型汽车',
     direction: '进入',
     device: '行政楼入口道闸',
@@ -641,7 +641,7 @@ const passageRecords = ref([
   },
   {
     time: '2025-05-20 14:05:00',
-    plateNumber: '鲁A·2T456',
+    plateNumber: '鲁H·2T456',
     vehicleType: '小型汽车',
     direction: '进入',
     device: '研发楼入口道闸',
@@ -650,7 +650,7 @@ const passageRecords = ref([
   },
   {
     time: '2025-05-20 14:10:00',
-    plateNumber: '鲁A·1U789',
+    plateNumber: '鲁H·1U789',
     vehicleType: '小型汽车',
     direction: '进入',
     device: '行政楼入口道闸',
@@ -659,7 +659,7 @@ const passageRecords = ref([
   },
   {
     time: '2025-05-20 14:15:00',
-    plateNumber: '鲁A·0V234',
+    plateNumber: '鲁H·0V234',
     vehicleType: '小型汽车',
     direction: '进入',
     device: '研发楼入口道闸',
@@ -668,7 +668,7 @@ const passageRecords = ref([
   },
   {
     time: '2025-05-20 17:00:00',
-    plateNumber: '鲁A·8K123',
+    plateNumber: '鲁H·8K123',
     vehicleType: '小型汽车',
     direction: '离开',
     device: '行政楼出口道闸',
@@ -677,7 +677,7 @@ const passageRecords = ref([
   },
   {
     time: '2025-05-20 17:05:00',
-    plateNumber: '鲁A·6M789',
+    plateNumber: '鲁H·6M789',
     vehicleType: '小型汽车',
     direction: '离开',
     device: '研发楼出口道闸',
@@ -686,7 +686,7 @@ const passageRecords = ref([
   },
   {
     time: '2025-05-20 17:10:00',
-    plateNumber: '鲁A·5N456',
+    plateNumber: '鲁H·5N456',
     vehicleType: '小型汽车',
     direction: '离开',
     device: '行政楼出口道闸',
@@ -695,7 +695,7 @@ const passageRecords = ref([
   },
   {
     time: '2025-05-20 17:15:00',
-    plateNumber: '鲁A·9P234',
+    plateNumber: '鲁H·9P234',
     vehicleType: '小型汽车',
     direction: '离开',
     device: '行政楼出口道闸',
@@ -704,7 +704,7 @@ const passageRecords = ref([
   },
   {
     time: '2025-05-20 17:20:00',
-    plateNumber: '鲁A·7Q567',
+    plateNumber: '鲁H·7Q567',
     vehicleType: '小型汽车',
     direction: '离开',
     device: '研发楼出口道闸',
@@ -713,7 +713,7 @@ const passageRecords = ref([
   },
   {
     time: '2025-05-20 17:25:00',
-    plateNumber: '鲁A·4R890',
+    plateNumber: '鲁H·4R890',
     vehicleType: '小型汽车',
     direction: '离开',
     device: '研发楼出口道闸',
@@ -722,7 +722,7 @@ const passageRecords = ref([
   },
   {
     time: '2025-05-20 17:30:00',
-    plateNumber: '鲁A·3S123',
+    plateNumber: '鲁H·3S123',
     vehicleType: '小型汽车',
     direction: '离开',
     device: '行政楼出口道闸',
@@ -731,7 +731,7 @@ const passageRecords = ref([
   },
   {
     time: '2025-05-20 17:35:00',
-    plateNumber: '鲁A·2T456',
+    plateNumber: '鲁H·2T456',
     vehicleType: '小型汽车',
     direction: '离开',
     device: '研发楼出口道闸',
@@ -740,7 +740,7 @@ const passageRecords = ref([
   },
   {
     time: '2025-05-20 17:40:00',
-    plateNumber: '鲁A·1U789',
+    plateNumber: '鲁H·1U789',
     vehicleType: '小型汽车',
     direction: '离开',
     device: '行政楼出口道闸',
@@ -749,7 +749,7 @@ const passageRecords = ref([
   },
   {
     time: '2025-05-20 17:45:00',
-    plateNumber: '鲁A·0V234',
+    plateNumber: '鲁H·0V234',
     vehicleType: '小型汽车',
     direction: '离开',
     device: '研发楼出口道闸',
@@ -803,7 +803,7 @@ const startMonitoring = () => {
   console.log('开始监控')
   // 模拟识别结果
   currentRecognition.value = {
-    plateNumber: '鲁A·8K123',
+    plateNumber: '鲁H·8K123',
     vehicleType: '小型汽车',
     time: new Date().toLocaleString(),
     status: 'success',
